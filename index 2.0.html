@@ -1,0 +1,3489 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Organizer Pro - Gestione Task, Finanze e Obiettivi">
+<title>Organizer Pro - Task, Eventi, Finanze e Obiettivi</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root {
+  /* Tema scuro (default) */
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-card: #334155;
+  --bg-hover: #475569;
+  --primary: #3b82f6;
+  --primary-hover: #2563eb;
+  --success: #10b981;
+  --success-light: #d1fae5;
+  --danger: #ef4444;
+  --danger-light: #fee2e2;
+  --warning: #f59e0b;
+  --warning-light: #fef3c7;
+  --info: #06b6d4;
+  --income: #10b981;
+  --expense: #ef4444;
+  --savings: #8b5cf6;
+  --goal: #ec4899;
+  --planned: #8b5cf6;
+  --text: #f8fafc;
+  --text-muted: #cbd5e1;
+  --border: #475569;
+  --shadow: rgba(0, 0, 0, 0.4);
+  
+  --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  --gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  --gradient-4: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  --gradient-5: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+}
+
+/* Tema chiaro */
+.light-theme {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #e2e8f0;
+  --bg-card: #ffffff;
+  --bg-hover: #f1f5f9;
+  --primary: #3b82f6;
+  --primary-hover: #2563eb;
+  --success: #10b981;
+  --success-light: #d1fae5;
+  --danger: #ef4444;
+  --danger-light: #fee2e2;
+  --warning: #f59e0b;
+  --warning-light: #fef3c7;
+  --info: #06b6d4;
+  --income: #10b981;
+  --expense: #ef4444;
+  --savings: #8b5cf6;
+  --goal: #ec4899;
+  --planned: #8b5cf6;
+  --text: #1e293b;
+  --text-muted: #64748b;
+  --border: #cbd5e1;
+  --shadow: rgba(0, 0, 0, 0.1);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+}
+
+body {
+  min-height: 100vh;
+  background: var(--bg-primary);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+/* CLS Optimization: Containment and Dimensions */
+.stat-card {
+    contain: content;
+    min-height: 90px; /* Previene il salto all'inserimento del contenuto */
+}
+
+.panel {
+    contain: layout paint; /* Ottimizzazione rendering browser */
+}
+
+.chart-container {
+    position: relative;
+    height: 300px; /* Altezza fissa per evitare CLS */
+    width: 100%;
+    overflow: hidden;
+}
+
+/* Theme Toggle Button */
+.theme-toggle {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px var(--shadow);
+  transition: all 0.3s;
+}
+
+.theme-toggle:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px var(--shadow);
+}
+
+.theme-toggle i {
+  font-size: 20px;
+  color: var(--text);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 0;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.logo {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  background: var(--gradient-1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  box-shadow: 0 4px 10px var(--shadow);
+  flex-shrink: 0; /* Previene schiacciamento */
+}
+
+.header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6, #10b981, #ec4899);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.header-subtitle {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-top: 5px;
+}
+
+.stats {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.stat-card {
+  background: var(--bg-card);
+  padding: 12px 18px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 140px;
+  box-shadow: 0 4px 6px var(--shadow);
+  transition: transform 0.3s;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+
+.stat-value.positive { color: var(--success); }
+.stat-value.negative { color: var(--danger); }
+.stat-value.neutral { color: var(--primary); }
+.stat-value.goal { color: var(--goal); }
+.stat-value.planned { color: var(--planned); }
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-align: center;
+}
+
+.main-content {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 25px;
+  flex: 1;
+}
+
+@media (max-width: 1600px) {
+  .main-content {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .todo-panel, .calendar-panel {
+    grid-column: span 1;
+  }
+  
+  .finances-panel, .goals-panel {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 900px) {
+  .main-content {
+    grid-template-columns: 1fr;
+  }
+  
+  .finances-panel, .goals-panel {
+    grid-column: span 1;
+  }
+}
+
+.panel {
+  background: var(--bg-card);
+  border-radius: 20px;
+  padding: 25px;
+  box-shadow: 0 10px 25px var(--shadow);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s ease;
+  min-height: 600px;
+}
+
+.panel:hover {
+  transform: translateY(-5px);
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--border);
+}
+
+.panel-title {
+  font-size: 22px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.panel-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.todo-icon { background: var(--gradient-1); }
+.calendar-icon { background: var(--gradient-2); }
+.finances-icon { background: var(--gradient-4); }
+.goals-icon { background: var(--gradient-5); }
+.notes-icon { background: var(--gradient-3); }
+
+.input-container {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 25px;
+  flex-wrap: wrap;
+}
+
+.input-field {
+  flex: 1;
+  padding: 14px 18px;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  background: var(--bg-secondary);
+  color: var(--text);
+  font-size: 15px;
+  transition: all 0.3s;
+  min-width: 200px;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.input-field::placeholder { color: #94a3b8; }
+
+.select-field {
+  background: var(--bg-secondary);
+  color: var(--text);
+  border: 2px solid transparent;
+  border-radius: 12px;
+  padding: 14px 15px;
+  cursor: pointer;
+  min-width: 150px;
+  font-size: 15px;
+}
+
+.btn {
+  padding: 14px 24px;
+  border-radius: 12px;
+  border: none;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.btn-primary { background: var(--primary); color: white; }
+.btn-primary:hover { background: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 6px 12px rgba(59, 130, 246, 0.3); }
+
+.btn-success { background: var(--success); color: white; }
+.btn-success:hover { background: #0da271; transform: translateY(-2px); }
+
+.btn-goal { background: var(--goal); color: white; }
+.btn-goal:hover { background: #db2777; transform: translateY(-2px); }
+
+.btn-planned { background: var(--planned); color: white; }
+.btn-planned:hover { background: #7c3aed; transform: translateY(-2px); }
+
+.btn-danger { background: var(--danger); color: white; }
+.btn-danger:hover { background: #dc2626; transform: translateY(-2px); }
+
+.btn-small { padding: 8px 16px; font-size: 14px; }
+
+.task-list, .finance-list, .goals-list, .notes-list, .planned-tasks-list {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 5px;
+  max-height: 400px;
+  min-height: 100px; /* Previene collasso layout */
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-secondary); border-radius: 10px; }
+::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
+
+.task-item, .finance-item, .goal-item, .note-item, .planned-task-item {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  background: var(--bg-secondary);
+  border-radius: 14px;
+  margin-bottom: 12px;
+  transition: all 0.3s;
+  border-left: 4px solid transparent;
+}
+
+.task-item:hover, .finance-item:hover, .goal-item:hover, .note-item:hover, .planned-task-item:hover {
+  background: var(--bg-hover);
+  transform: translateX(5px);
+}
+
+.task-item.completed { opacity: 0.7; border-left-color: var(--success); }
+.task-item.planned { border-left-color: var(--planned); }
+.goal-item.completed { border-left-color: var(--success); }
+.goal-item.at-risk { border-left-color: var(--warning); }
+.goal-item.behind { border-left-color: var(--danger); }
+
+.task-checkbox {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 2px solid var(--border);
+  background: transparent;
+  margin-right: 15px;
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.task-checkbox.checked { background: var(--success); border-color: var(--success); }
+.task-checkbox.checked::after { content: '✓'; color: white; font-weight: bold; font-size: 14px; }
+
+.task-content, .finance-content, .goal-content, .note-content, .planned-task-content { flex: 1; }
+
+.task-text { font-size: 16px; margin-bottom: 5px; }
+.task-completed { text-decoration: line-through; color: var(--text-muted); }
+
+.task-meta { display: flex; gap: 15px; font-size: 13px; color: var(--text-muted); }
+.task-date, .task-time, .task-repeat, .task-planned-dates { display: flex; align-items: center; gap: 5px; }
+
+.task-planned-dates .date-badge {
+  background: var(--planned);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-right: 5px;
+}
+
+.finance-amount { font-size: 18px; font-weight: 700; margin-left: 10px; }
+.finance-amount.income { color: var(--income); }
+.finance-amount.expense { color: var(--expense); }
+
+.finance-category {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 5px;
+}
+.category-cibo { background: #3b82f6; color: white; }
+.category-trasporti { background: #8b5cf6; color: white; }
+.category-svago { background: #ec4899; color: white; }
+.category-casa { background: #f59e0b; color: black; }
+.category-shopping { background: #10b981; color: white; }
+.category-salute { background: #ef4444; color: white; }
+.category-stipendio { background: #84cc16; color: black; }
+.category-investimenti { background: #06b6d4; color: white; }
+.category-altro { background: #64748b; color: white; }
+
+.finance-description { font-size: 14px; color: var(--text-muted); margin-top: 3px; }
+.finance-date { font-size: 12px; color: var(--text-muted); }
+
+/* Goal Progress */
+.goal-progress { margin-top: 10px; }
+.progress-bar { height: 8px; background: var(--bg-hover); border-radius: 4px; overflow: hidden; margin-bottom: 5px; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--goal), #f472b6); border-radius: 4px; transition: width 0.5s ease; }
+.progress-text { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); }
+
+.goal-amount { font-size: 18px; font-weight: 700; color: var(--goal); }
+.goal-status { display: inline-block; padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; margin-left: 10px; }
+.status-ontrack { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+.status-atrisk { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+.status-behind { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+.status-completed { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+
+.task-actions, .finance-actions, .goal-actions, .note-actions, .planned-task-actions { display: flex; gap: 10px; }
+
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.icon-btn:hover { background: var(--bg-hover); color: var(--text); }
+.delete-btn:hover { color: var(--danger); background: rgba(239, 68, 68, 0.1); }
+.edit-btn:hover { color: var(--primary); background: rgba(59, 130, 246, 0.1); }
+.plan-btn:hover { color: var(--planned); background: rgba(139, 92, 246, 0.1); }
+
+/* Finances Dashboard */
+.finances-dashboard { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 25px; }
+.goals-dashboard { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px; }
+
+.chart-container { background: var(--bg-secondary); border-radius: 16px; padding: 20px; height: 300px; }
+
+.summary-container { background: var(--bg-secondary); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+.summary-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-radius: 12px; background: rgba(255, 255, 255, 0.05); }
+.summary-label { font-size: 14px; color: var(--text-muted); }
+.summary-value { font-size: 20px; font-weight: 700; }
+.summary-income .summary-value { color: var(--income); }
+.summary-expense .summary-value { color: var(--expense); }
+.summary-balance .summary-value { color: var(--primary); }
+.summary-goal .summary-value { color: var(--goal); }
+
+.filters-container { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+.filter-btn { padding: 8px 16px; border-radius: 20px; border: 2px solid var(--border); background: transparent; color: var(--text); cursor: pointer; transition: all 0.3s; }
+.filter-btn.active { background: var(--primary); border-color: var(--primary); color: white; }
+.filter-btn:hover:not(.active) { background: var(--bg-hover); }
+
+/* Calendar */
+.calendar-container { margin-bottom: 25px; background: var(--bg-secondary); border-radius: 16px; padding: 20px; }
+.calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.calendar-month { font-size: 20px; font-weight: 600; }
+.calendar-nav { display: flex; gap: 10px; }
+.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+
+.calendar-day {
+  height: 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: 8px;
+  border-radius: 10px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+.calendar-day:hover { background: var(--bg-hover); }
+.calendar-day.header { height: 40px; justify-content: center; font-weight: 600; color: var(--text-muted); cursor: default; font-size: 14px; text-transform: uppercase; }
+.calendar-day.today { background: var(--primary); color: white; font-weight: 700; }
+.calendar-day.selected { border: 2px solid var(--primary); }
+.calendar-day.has-event::after { content: ''; position: absolute; width: 6px; height: 6px; border-radius: 50%; background: var(--warning); bottom: 5px; }
+.calendar-day.has-task::after { content: ''; position: absolute; width: 6px; height: 6px; border-radius: 50%; background: var(--planned); bottom: 5px; left: 8px; }
+.calendar-day.has-both::after { content: ''; position: absolute; width: 12px; height: 6px; border-radius: 3px; background: linear-gradient(90deg, var(--planned) 50%, var(--warning) 50%); bottom: 5px; }
+
+.calendar-day-number { font-size: 16px; margin-bottom: 2px; }
+.calendar-day-tasks { font-size: 10px; color: var(--planned); font-weight: 600; margin-top: 2px; }
+.calendar-day-events { font-size: 10px; color: var(--warning); font-weight: 600; margin-top: 2px; }
+
+/* Modal */
+.modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.7); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+.modal.active { display: flex; }
+.modal-content { background: var(--bg-card); border-radius: 20px; padding: 30px; max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto; }
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+.modal-title { font-size: 24px; font-weight: 600; }
+.close-modal { background: none; border: none; color: var(--text-muted); font-size: 24px; cursor: pointer; transition: color 0.3s; }
+.close-modal:hover { color: var(--text); }
+
+.form-group { margin-bottom: 20px; }
+.form-label { display: block; margin-bottom: 8px; color: var(--text-muted); font-size: 14px; font-weight: 500; }
+
+.radio-group { display: flex; gap: 15px; margin-bottom: 20px; }
+.radio-option { flex: 1; }
+.radio-option input { display: none; }
+.radio-label { display: block; padding: 15px; text-align: center; border-radius: 12px; border: 2px solid var(--border); cursor: pointer; transition: all 0.3s; }
+.radio-option input:checked + .radio-label { border-color: var(--primary); background: rgba(59, 130, 246, 0.1); }
+.radio-income input:checked + .radio-label { border-color: var(--income); background: rgba(16, 185, 129, 0.1); }
+.radio-expense input:checked + .radio-label { border-color: var(--expense); background: rgba(239, 68, 68, 0.1); }
+
+.empty-state { text-align: center; padding: 40px 20px; color: var(--text-muted); }
+.empty-icon { font-size: 48px; margin-bottom: 15px; opacity: 0.5; }
+
+/* Note Styling */
+.note-text { font-size: 14px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
+.note-text a { color: var(--primary); text-decoration: none; border-bottom: 1px dashed var(--primary); transition: all 0.3s; }
+.note-text a:hover { color: var(--primary-hover); border-bottom: 1px solid var(--primary-hover); }
+.note-date { font-size: 12px; color: var(--text-muted); margin-top: 8px; display: flex; align-items: center; gap: 5px; }
+
+/* Date Picker */
+.date-picker-container { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+.date-option { display: flex; align-items: center; gap: 5px; }
+.date-option input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
+
+/* Tabs */
+.tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+.tab { padding: 12px 24px; background: none; border: none; color: var(--text-muted); font-size: 15px; font-weight: 500; cursor: pointer; position: relative; transition: all 0.3s; }
+.tab:hover { color: var(--text); }
+.tab.active { color: var(--primary); }
+.tab.active::after { content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 3px; background: var(--primary); border-radius: 3px 3px 0 0; }
+.tab-content { display: none; flex: 1; overflow-y: auto; }
+.tab-content.active { display: block; }
+
+@media (max-width: 768px) {
+  .header { flex-direction: column; align-items: flex-start; gap: 20px; }
+  .stats { width: 100%; justify-content: space-between; }
+  .stat-card { min-width: auto; flex: 1; }
+  .finances-dashboard, .goals-dashboard { grid-template-columns: 1fr; }
+  .theme-toggle { top: 15px; right: 15px; width: 40px; height: 40px; }
+}
+
+/* Stili per drag & drop */
+.task-item.dragging {
+  opacity: 0.5;
+  transform: rotate(2deg);
+  z-index: 1000;
+  box-shadow: 0 10px 20px var(--shadow);
+}
+
+.task-item.drag-over {
+  border-top: 3px solid var(--primary);
+  background: rgba(59, 130, 246, 0.1);
+  transition: all 0.2s;
+}
+
+.drag-handle {
+  cursor: grab;
+  transition: all 0.2s;
+  border-radius: 6px;
+}
+
+.drag-handle:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+  transform: scale(1.1);
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+/* Effetto placeholder durante il drag */
+.task-item.dragging .drag-handle {
+  cursor: grabbing;
+}
+
+/* Disabilita selezione testo durante drag */
+.task-item {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Stili per cartelle note */
+.folders-container {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.folder-tab {
+  padding: 10px 20px;
+  background: var(--bg-secondary);
+  border: none;
+  border-radius: 12px;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.folder-tab.active {
+  background: var(--primary);
+  color: white;
+}
+
+.folder-tab:hover:not(.active) {
+  background: var(--bg-hover);
+}
+
+.folder-tab .badge {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 12px;
+}
+
+.add-folder-btn {
+  padding: 10px;
+  background: transparent;
+  border: 2px dashed var(--border);
+  border-radius: 12px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.add-folder-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+/* Stili per file allegati */
+.file-attachment {
+  display: flex;
+  align-items: center;
+  background: var(--bg-secondary);
+  border-radius: 10px;
+  padding: 10px;
+  margin-top: 10px;
+  gap: 10px;
+  transition: all 0.3s;
+}
+
+.file-attachment:hover {
+  background: var(--bg-hover);
+  transform: translateX(5px);
+}
+
+.file-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gradient-1);
+  border-radius: 8px;
+  font-size: 18px;
+}
+
+.file-info {
+  flex: 1;
+}
+
+.file-name {
+  font-weight: 500;
+  font-size: 14px;
+  margin-bottom: 3px;
+  word-break: break-all;
+}
+
+.file-size {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.file-download {
+  color: var(--primary);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  transition: all 0.3s;
+}
+
+.file-download:hover {
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.file-preview {
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: 10px;
+  margin-top: 10px;
+  display: block;
+  object-fit: contain;
+}
+
+/* Modal cartelle */
+.folder-color-option {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.3s;
+}
+
+.folder-color-option.selected {
+  border-color: white;
+  transform: scale(1.1);
+}
+
+.folder-colors {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+/* File upload button */
+.file-upload-container {
+  position: relative;
+  margin-bottom: 15px;
+}
+
+.file-upload-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 14px;
+}
+
+.file-upload-label:hover {
+  background: var(--bg-hover);
+}
+
+.file-upload-input {
+  position: absolute;
+  opacity: 0;
+  width: 0.1px;
+  height: 0.1px;
+}
+
+.selected-files {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.file-tag {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--bg-secondary);
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+}
+
+.file-tag button {
+  background: none;
+  border: none;
+  color: var(--danger);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 0 5px;
+}
+
+.note-folder {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: 5px;
+  background: var(--gradient-1);
+  color: white;
+}
+</style>
+</head>
+<body>
+  <div class="theme-toggle" id="themeToggle">
+    <i class="fas fa-moon"></i>
+  </div>
+  
+  <header class="header">
+    <div class="header-title">
+      <div class="logo">
+        <i class="fas fa-bullseye"></i>
+      </div>
+      <div>
+        <h1>Organizer Pro</h1>
+        <div class="header-subtitle">Gestisci attività, finanze e raggiungi i tuoi obiettivi</div>
+      </div>
+    </div>
+    
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-value" id="totalTasks">0</div>
+        <div class="stat-label">Attività</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value positive" id="monthBalance">€0</div>
+        <div class="stat-label">Bilancio</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value goal" id="goalProgress">0%</div>
+        <div class="stat-label">Progresso</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value planned" id="plannedTasks">0</div>
+        <div class="stat-label">Pianificate</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value neutral" id="daysToMonthEnd">0</div>
+        <div class="stat-label">Fine Mese</div>
+      </div>
+    </div>
+  </header>
+  
+  <main class="main-content">
+    <section class="panel todo-panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <div class="panel-icon todo-icon">
+            <i class="fas fa-list-check"></i>
+          </div>
+          <div>To-Do List</div>
+        </div>
+        <div class="task-summary" id="todoSummary">0/0</div>
+      </div>
+      
+      <div class="input-container">
+        <input type="text" class="input-field" id="todoInput" placeholder="Nuova attività...">
+        <button class="btn btn-primary" id="addTodoBtn">
+          <i class="fas fa-plus"></i> Aggiungi
+        </button>
+      </div>
+      
+      <div class="tabs">
+        <button class="tab active" data-tab="all-tasks">Tutte</button>
+        <button class="tab" data-tab="unplanned-tasks">Da Pianificare</button>
+        <button class="tab" data-tab="planned-tasks">Pianificate</button>
+      </div>
+      
+      <div class="task-list" id="todoList"></div>
+    </section>
+    
+    <section class="panel calendar-panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <div class="panel-icon calendar-icon">
+            <i class="fas fa-calendar-days"></i>
+          </div>
+          <div>Planner</div>
+        </div>
+        <button class="btn btn-primary btn-small" id="todayBtn">
+          <i class="fas fa-calendar-day"></i> Oggi
+        </button>
+      </div>
+      
+      <div class="calendar-container">
+        <div class="calendar-header">
+          <div class="calendar-month" id="currentMonth">Marzo 2024</div>
+          <div class="calendar-nav">
+            <button class="icon-btn" id="prevMonthBtn">
+              <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="icon-btn" id="nextMonthBtn">
+              <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+        <div class="calendar-grid" id="calendar"></div>
+      </div>
+      
+      <div class="tabs">
+        <button class="tab active" data-tab="events-tab">Eventi</button>
+        <button class="tab" data-tab="tasks-tab">Attività Pianificate</button>
+      </div>
+      
+      <div class="tab-content active" id="events-tab-content">
+        <div class="input-container">
+          <input type="text" class="input-field" id="eventInput" placeholder="Evento...">
+          <input type="date" class="input-field" id="eventDate">
+          <input type="time" class="input-field" id="eventTime">
+          <select class="input-field select-field" id="eventRepeat">
+            <option value="none">Non ripetere</option>
+            <option value="daily">Giornaliero</option>
+            <option value="weekly">Settimanale</option>
+            <option value="monthly">Mensile</option>
+          </select>
+          <button class="btn btn-primary" id="addEventBtn">
+            <i class="fas fa-plus"></i>
+          </button>
+        </div>
+        
+        <div class="task-list" id="eventList"></div>
+      </div>
+      
+      <div class="tab-content" id="tasks-tab-content">
+        <div class="planned-tasks-list" id="plannedTasksList"></div>
+      </div>
+    </section>
+    
+    <section class="panel finances-panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <div class="panel-icon finances-icon">
+            <i class="fas fa-wallet"></i>
+          </div>
+          <div>Finanze Personali</div>
+        </div>
+        <button class="btn btn-success" id="addTransactionBtn">
+          <i class="fas fa-plus-circle"></i> Transazione
+        </button>
+      </div>
+      
+      <div class="finances-dashboard">
+        <div class="chart-container">
+          <canvas id="financeChart"></canvas>
+        </div>
+        
+        <div class="summary-container">
+          <div class="summary-item summary-income">
+            <div class="summary-label">Entrate Mensili</div>
+            <div class="summary-value" id="monthlyIncome">€0</div>
+          </div>
+          <div class="summary-item summary-expense">
+            <div class="summary-label">Uscite Mensili</div>
+            <div class="summary-value" id="monthlyExpense">€0</div>
+          </div>
+          <div class="summary-item summary-balance">
+            <div class="summary-label">Saldo Mese</div>
+            <div class="summary-value" id="monthlyBalance">€0</div>
+          </div>
+          <div class="summary-item summary-goal">
+            <div class="summary-label">Progresso Obiettivo</div>
+            <div class="summary-value" id="monthlyGoalProgress">0%</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="filters-container">
+        <button class="filter-btn active" data-filter="all">Tutte</button>
+        <button class="filter-btn" data-filter="income">Entrate</button>
+        <button class="filter-btn" data-filter="expense">Uscite</button>
+        <button class="filter-btn" data-filter="cibo">Cibo</button>
+        <button class="filter-btn" data-filter="shopping">Shopping</button>
+      </div>
+      
+      <div class="finance-list" id="financeList"></div>
+    </section>
+    
+    <section class="panel goals-panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <div class="panel-icon goals-icon">
+            <i class="fas fa-bullseye"></i>
+          </div>
+          <div>Obiettivi di Risparmio</div>
+        </div>
+        <button class="btn btn-goal" id="addGoalBtn">
+          <i class="fas fa-plus-circle"></i> Nuovo Obiettivo
+        </button>
+      </div>
+      
+      <div class="goals-dashboard">
+        <div class="chart-container">
+          <canvas id="goalsChart"></canvas>
+        </div>
+        
+        <div class="summary-container">
+          <div class="summary-item">
+            <div class="summary-label">Obiettivo Mensile</div>
+            <div class="summary-value goal" id="goalTarget">€0</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-label">Risparmiato</div>
+            <div class="summary-value positive" id="goalSaved">€0</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-label">Mancante</div>
+            <div class="summary-value" id="goalRemaining">€0</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-label">Ritmo Giornaliero</div>
+            <div class="summary-value" id="dailyPace">€0/giorno</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="goals-list" id="goalsList"></div>
+    </section>
+    
+    <section class="panel notes-panel" style="grid-column: span 2;">
+      <div class="panel-header">
+        <div class="panel-title">
+          <div class="panel-icon notes-icon">
+            <i class="fas fa-sticky-note"></i>
+          </div>
+          <div>Note Personali</div>
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <button class="btn btn-primary" id="addFolderBtn">
+            <i class="fas fa-folder-plus"></i> Cartella
+          </button>
+          <button class="btn btn-primary" id="addNoteBtn">
+            <i class="fas fa-plus-circle"></i> Nuova Nota
+          </button>
+        </div>
+      </div>
+      
+      <!-- Cartelle -->
+      <div class="folders-container" id="foldersContainer">
+        <!-- Le cartelle verranno caricate qui -->
+      </div>
+      
+      <!-- Area per nuova nota -->
+      <div class="input-container">
+        <textarea class="input-field" id="noteInput" placeholder="Scrivi una nuova nota (i link diventano automaticamente cliccabili)..." rows="3"></textarea>
+      </div>
+      
+      <!-- Upload file -->
+		<div class="file-upload-container">
+		  <label class="file-upload-label">
+			<i class="fas fa-paperclip"></i> Allega File (max 5MB: immagini, PDF, documenti, archivi)
+			<input type="file" class="file-upload-input" id="fileUpload" multiple onchange="handleFileSelect(event)">
+		  </label>
+		  <div class="selected-files" id="selectedFiles"></div>
+		</div>
+      
+      <!-- Selezione cartella -->
+      <div class="form-group" style="margin-top: 10px;">
+        <select class="input-field select-field" id="noteFolder">
+          <option value="">Nessuna cartella</option>
+          <!-- Le cartelle verranno caricate qui -->
+        </select>
+      </div>
+      
+      <button class="btn btn-primary" onclick="addNote()" style="margin-bottom: 20px;">
+        <i class="fas fa-save"></i> Salva Nota
+      </button>
+      
+      <div class="notes-list" id="notesList"></div>
+    </section>
+  </main>
+  
+  <div class="modal" id="transactionModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">Nuova Transazione</div>
+        <button class="close-modal" onclick="closeTransactionModal()">&times;</button>
+      </div>
+      <input type="hidden" id="editTransactionIndex" value="-1">
+      
+      <div class="radio-group">
+        <div class="radio-option radio-income">
+          <input type="radio" id="type-income" name="transactionType" value="income" checked>
+          <label for="type-income" class="radio-label">
+            <i class="fas fa-arrow-down"></i><br>
+            Entrata
+          </label>
+        </div>
+        <div class="radio-option radio-expense">
+          <input type="radio" id="type-expense" name="transactionType" value="expense">
+          <label for="type-expense" class="radio-label">
+            <i class="fas fa-arrow-up"></i><br>
+            Uscita
+          </label>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Importo (€)</label>
+        <input type="number" class="input-field" id="transactionAmount" placeholder="0.00" step="0.01" min="0">
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Descrizione</label>
+        <input type="text" class="input-field" id="transactionDescription" placeholder="Descrizione della transazione...">
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Categoria</label>
+        <select class="input-field select-field" id="transactionCategory">
+          <option value="cibo">🍕 Cibo e Bevande</option>
+          <option value="trasporti">🚗 Trasporti</option>
+          <option value="casa">🏠 Casa e Bollette</option>
+          <option value="shopping">🛍️ Shopping</option>
+          <option value="svago">🎬 Svago e Intrattenimento</option>
+          <option value="salute">🏥 Salute e Benessere</option>
+          <option value="stipendio">💰 Stipendio</option>
+          <option value="investimenti">📈 Investimenti</option>
+          <option value="altro">📋 Altro</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Data</label>
+        <input type="date" class="input-field" id="transactionDate">
+      </div>
+      
+      <button class="btn btn-success" onclick="saveTransaction()" style="width: 100%;">
+        <i class="fas fa-save"></i> Salva Transazione
+      </button>
+    </div>
+  </div>
+  
+  <div class="modal" id="goalModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">Nuovo Obiettivo di Risparmio</div>
+        <button class="close-modal" onclick="closeGoalModal()">&times;</button>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Nome Obiettivo</label>
+        <input type="text" class="input-field" id="goalName" placeholder="Es: Risparmio per vacanza, Auto nuova...">
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Importo Obiettivo (€)</label>
+        <input type="number" class="input-field" id="goalTargetAmount" placeholder="500" step="1" min="1">
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Periodo</label>
+        <select class="input-field select-field" id="goalPeriod">
+          <option value="monthly">Mensile</option>
+          <option value="quarterly">Trimestrale</option>
+          <option value="yearly">Annuale</option>
+          <option value="custom">Personalizzato</option>
+        </select>
+      </div>
+      
+      <div class="form-group" id="customDateRange" style="display: none;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div>
+            <label class="form-label">Data Inizio</label>
+            <input type="date" class="input-field" id="goalStartDate">
+          </div>
+          <div>
+            <label class="form-label">Data Fine</label>
+            <input type="date" class="input-field" id="goalEndDate">
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Priorità</label>
+        <select class="input-field select-field" id="goalPriority">
+          <option value="high">Alta</option>
+          <option value="medium" selected>Media</option>
+          <option value="low">Bassa</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Categoria</label>
+        <select class="input-field select-field" id="goalCategory">
+          <option value="vacanza">🏖️ Vacanza</option>
+          <option value="auto">🚗 Auto</option>
+          <option value="casa">🏠 Casa</option>
+          <option value="investimenti">📈 Investimenti</option>
+          <option value="emergenza">🚨 Fondo Emergenza</option>
+          <option value="hobby">🎨 Hobby</option>
+          <option value="studio">📚 Studio</option>
+          <option value="altro">🎯 Altro</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Descrizione (opzionale)</label>
+        <textarea class="input-field" id="goalDescription" placeholder="Descrizione dettagliata dell'obiettivo..." rows="3"></textarea>
+      </div>
+      
+      <button class="btn btn-goal" onclick="addGoal()" style="width: 100%;">
+        <i class="fas fa-bullseye"></i> Crea Obiettivo
+      </button>
+    </div>
+  </div>
+  
+  <div class="modal" id="planModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">Pianifica Attività</div>
+        <button class="close-modal" onclick="closePlanModal()">&times;</button>
+      </div>
+      <input type="hidden" id="planTaskIndex" value="-1">
+      
+      <div class="form-group">
+        <label class="form-label">Attività</label>
+        <div class="input-field" id="planTaskText" style="background: var(--bg-secondary); padding: 15px; border-radius: 12px; font-weight: 500;"></div>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Seleziona i giorni per questa attività</label>
+        <div class="date-picker-container" id="datePicker">
+          </div>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Oppure, inserisci date specifiche (separate da virgola):</label>
+        <input type="text" class="input-field" id="customDates" placeholder="es: 2024-03-15, 2024-03-20, 2024-03-25">
+        <div style="font-size: 12px; color: var(--text-muted); margin-top: 5px;">
+          Formato: YYYY-MM-DD, YYYY-MM-DD, ...
+        </div>
+      </div>
+      
+      <button class="btn btn-planned" onclick="saveTaskPlanning()" style="width: 100%;">
+        <i class="fas fa-calendar-plus"></i> Salva Pianificazione
+      </button>
+    </div>
+  </div>
+  
+  <div class="modal" id="folderModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">Nuova Cartella</div>
+        <button class="close-modal" onclick="closeFolderModal()">&times;</button>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Nome Cartella</label>
+        <input type="text" class="input-field" id="folderName" placeholder="Es: Lavoro, Personale, Idee...">
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Colore</label>
+        <div class="folder-colors">
+          <div class="folder-color-option" style="background: #3b82f6;" data-color="#3b82f6" onclick="selectColor(this)"></div>
+          <div class="folder-color-option" style="background: #10b981;" data-color="#10b981" onclick="selectColor(this)"></div>
+          <div class="folder-color-option" style="background: #f59e0b;" data-color="#f59e0b" onclick="selectColor(this)"></div>
+          <div class="folder-color-option" style="background: #ec4899;" data-color="#ec4899" onclick="selectColor(this)"></div>
+          <div class="folder-color-option" style="background: #8b5cf6;" data-color="#8b5cf6" onclick="selectColor(this)"></div>
+          <div class="folder-color-option" style="background: #ef4444;" data-color="#ef4444" onclick="selectColor(this)"></div>
+          <div class="folder-color-option" style="background: #06b6d4;" data-color="#06b6d4" onclick="selectColor(this)"></div>
+        </div>
+        <input type="hidden" id="folderColor" value="#3b82f6">
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Icona</label>
+        <select class="input-field select-field" id="folderIcon">
+          <option value="fas fa-folder">📁 Cartella</option>
+          <option value="fas fa-briefcase">💼 Lavoro</option>
+          <option value="fas fa-home">🏠 Casa</option>
+          <option value="fas fa-graduation-cap">🎓 Studio</option>
+          <option value="fas fa-heart">❤️ Personale</option>
+          <option value="fas fa-lightbulb">💡 Idee</option>
+          <option value="fas fa-utensils">🍽️ Cibo</option>
+          <option value="fas fa-dumbbell">💪 Fitness</option>
+          <option value="fas fa-plane">✈️ Viaggi</option>
+        </select>
+      </div>
+      
+      <button class="btn btn-primary" onclick="createFolder()" style="width: 100%;">
+        <i class="fas fa-folder-plus"></i> Crea Cartella
+      </button>
+    </div>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Stati e inizializzazione
+let todos = JSON.parse(localStorage.getItem('organizer_todos')) || [];
+let events = JSON.parse(localStorage.getItem('organizer_events')) || [];
+let transactions = JSON.parse(localStorage.getItem('organizer_transactions')) || [];
+let goals = JSON.parse(localStorage.getItem('organizer_goals')) || [];
+let notes = JSON.parse(localStorage.getItem('organizer_notes')) || [];
+let folders = JSON.parse(localStorage.getItem('organizer_folders')) || [
+  { id: 'all', name: 'Tutte le note', icon: 'fas fa-layer-group', color: '#3b82f6' },
+  { id: 'uncategorized', name: 'Senza cartella', icon: 'fas fa-inbox', color: '#64748b' }
+];
+let currentDate = new Date();
+let selectedDate = new Date().toISOString().split('T')[0];
+let calendarFilter = null;
+let financeChart = null;
+let goalsChart = null;
+let currentFilter = 'all';
+let currentTodoTab = 'all-tasks';
+let currentCalendarTab = 'events-tab';
+let currentFolder = 'all';
+let selectedFiles = [];
+
+// Funzione per convertire URL in link cliccabili (MIGLIORATA)
+function linkify(text) {
+  // Regex migliorata per catturare anche www.
+  const urlRegex = /((https?:\/\/)|(www\.))[^\s]+/ig;
+  return text.replace(urlRegex, function(url) {
+    let href = url;
+    if (!href.startsWith('http')) {
+      href = 'http://' + href;
+    }
+    return '<a href="' + href + '" target="_blank" rel="noopener noreferrer">' + url + '</a>';
+  });
+}
+
+// Toggle tema
+function toggleTheme() {
+  document.body.classList.toggle('light-theme');
+  const isLight = document.body.classList.contains('light-theme');
+  document.getElementById('themeToggle').innerHTML = isLight ? 
+    '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+  localStorage.setItem('organizer_theme', isLight ? 'light' : 'dark');
+  
+  // Ricrea i grafici con il nuovo tema
+  if (financeChart) {
+    renderFinanceChart();
+  }
+  if (goalsChart) {
+    renderGoalsChart();
+  }
+}
+
+// Inizializza Charts
+const financeCtx = document.getElementById('financeChart').getContext('2d');
+const goalsCtx = document.getElementById('goalsChart').getContext('2d');
+
+// Salvataggio dati
+function saveData() {
+  localStorage.setItem('organizer_todos', JSON.stringify(todos));
+  localStorage.setItem('organizer_events', JSON.stringify(events));
+  localStorage.setItem('organizer_transactions', JSON.stringify(transactions));
+  localStorage.setItem('organizer_goals', JSON.stringify(goals));
+  localStorage.setItem('organizer_notes', JSON.stringify(notes));
+  localStorage.setItem('organizer_folders', JSON.stringify(folders));
+  
+  // Eseguiamo updateStats in un blocco try/catch per sicurezza
+  try {
+    updateStats();
+  } catch (e) {
+    console.error("Errore updateStats", e);
+  }
+  
+  updateFinanceStats();
+  updateGoalsStats();
+  renderFinanceChart();
+  renderGoalsChart();
+}
+
+// Aggiornamento statistiche header (CORRETTO)
+function updateStats() {
+  const totalTasks = todos.length;
+  const completedTasks = todos.filter(t => t.completed).length;
+  const plannedTasks = todos.filter(t => t.plannedDates && t.plannedDates.length > 0).length;
+  
+  if(document.getElementById('totalTasks')) 
+    document.getElementById('totalTasks').textContent = totalTasks;
+  
+  if(document.getElementById('todoSummary'))
+    document.getElementById('todoSummary').textContent = `${completedTasks}/${totalTasks}`;
+  
+  if(document.getElementById('plannedTasks'))
+    document.getElementById('plannedTasks').textContent = plannedTasks;
+  
+  // Calcola giorni alla fine del mese
+  const now = new Date();
+  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  const daysLeft = Math.ceil((endOfMonth - now) / (1000 * 60 * 60 * 24));
+  
+  // FIX: Controllo esistenza elemento prima di assegnare
+  const daysEl = document.getElementById('daysToMonthEnd');
+  if (daysEl) {
+    daysEl.textContent = daysLeft;
+  }
+}
+
+// TO-DO LIST AVANZATA
+function renderTodos() {
+  const todoList = document.getElementById('todoList');
+  
+  let filteredTodos = [...todos];
+  
+  if (currentTodoTab === 'unplanned-tasks') {
+    filteredTodos = todos.filter(t => !t.plannedDates || t.plannedDates.length === 0);
+  } else if (currentTodoTab === 'planned-tasks') {
+    filteredTodos = todos.filter(t => t.plannedDates && t.plannedDates.length > 0);
+  }
+  
+  if (filteredTodos.length === 0) {
+    let emptyMessage = '';
+    if (currentTodoTab === 'all-tasks') {
+      emptyMessage = 'Nessuna attività da completare';
+    } else if (currentTodoTab === 'unplanned-tasks') {
+      emptyMessage = 'Tutte le attività sono state pianificate';
+    } else if (currentTodoTab === 'planned-tasks') {
+      emptyMessage = 'Nessuna attività pianificata';
+    }
+    
+    todoList.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon"><i class="fas fa-clipboard-list"></i></div>
+        <div class="empty-text">${emptyMessage}</div>
+      </div>
+    `;
+    return;
+  }
+  
+  todoList.innerHTML = '';
+  
+  filteredTodos.forEach((todo, index) => {
+    const originalIndex = todos.findIndex(t => t.id === todo.id);
+    const todoItem = document.createElement('div');
+    todoItem.className = `task-item ${todo.completed ? 'completed' : ''} ${todo.plannedDates && todo.plannedDates.length > 0 ? 'planned' : ''}`;
+    
+    // Aggiungi attributi per drag & drop
+    todoItem.setAttribute('draggable', 'true');
+    todoItem.setAttribute('data-index', originalIndex);
+    todoItem.setAttribute('data-id', todo.id);
+    
+    const plannedDatesHTML = todo.plannedDates && todo.plannedDates.length > 0 ? `
+      <div class="task-planned-dates">
+        ${todo.plannedDates.map(date => {
+          const dateObj = new Date(date);
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          dateObj.setHours(0, 0, 0, 0);
+          let badgeClass = 'date-badge';
+          if (dateObj.getTime() === today.getTime()) {
+            badgeClass += ' today';
+          } else if (dateObj < today) {
+            badgeClass += ' past';
+          }
+          return `<span class="${badgeClass}"><i class="far fa-calendar"></i> ${formatDate(date)}</span>`;
+        }).join('')}
+      </div>
+    ` : '';
+    
+    todoItem.innerHTML = `
+      <div class="task-checkbox ${todo.completed ? 'checked' : ''}" data-index="${originalIndex}"></div>
+      <div class="task-content">
+        <div class="task-text ${todo.completed ? 'task-completed' : ''}">${todo.text}</div>
+        <div class="task-meta">
+          <div class="task-date"><i class="far fa-calendar"></i> ${formatDate(todo.created)}</div>
+          ${todo.plannedDates && todo.plannedDates.length > 0 ? 
+            `<div class="task-planned-dates"><i class="fas fa-calendar-check"></i> ${todo.plannedDates.length} giorno(i)</div>` : ''}
+        </div>
+        ${plannedDatesHTML}
+      </div>
+      <div class="task-actions">
+        <div class="drag-handle" style="cursor: grab; padding: 8px; color: var(--text-muted);">
+          <i class="fas fa-grip-vertical"></i>
+        </div>
+        <button class="icon-btn plan-btn" onclick="openPlanModal(${originalIndex})" title="Pianifica">
+          <i class="fas fa-calendar-plus"></i>
+        </button>
+        <button class="icon-btn delete-btn" onclick="deleteTodo(${originalIndex})">
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
+    `;
+    
+    todoList.appendChild(todoItem);
+  });
+  
+  // Aggiungi event listeners per drag & drop
+  setupDragAndDrop();
+  
+  document.querySelectorAll('.task-checkbox').forEach(checkbox => {
+    checkbox.addEventListener('click', function() {
+      const index = parseInt(this.getAttribute('data-index'));
+      todos[index].completed = !todos[index].completed;
+      saveData();
+      renderTodos();
+      renderCalendar();
+      renderPlannedTasks();
+    });
+  });
+}
+
+// Funzioni per drag & drop
+let draggedItem = null;
+let dragStartIndex = null;
+
+function setupDragAndDrop() {
+  const taskItems = document.querySelectorAll('.task-item');
+  
+  taskItems.forEach(item => {
+    item.addEventListener('dragstart', handleDragStart);
+    item.addEventListener('dragover', handleDragOver);
+    item.addEventListener('dragenter', handleDragEnter);
+    item.addEventListener('dragleave', handleDragLeave);
+    item.addEventListener('drop', handleDrop);
+    item.addEventListener('dragend', handleDragEnd);
+    
+    // Impedisci il drag & drop sull'handle (lo gestiamo separatamente)
+    const dragHandle = item.querySelector('.drag-handle');
+    if (dragHandle) {
+      dragHandle.addEventListener('mousedown', function(e) {
+        item.setAttribute('draggable', 'true');
+      });
+    }
+  });
+}
+
+function handleDragStart(e) {
+  draggedItem = this;
+  dragStartIndex = parseInt(this.getAttribute('data-index'));
+  
+  // Aggiungi classe di stile durante il drag
+  this.classList.add('dragging');
+  
+  // Usa l'effetto di trascinamento "move"
+  e.dataTransfer.effectAllowed = 'move';
+  
+  // Per mobile, imposta i dati di trasferimento
+  e.dataTransfer.setData('text/plain', this.getAttribute('data-id'));
+  
+  // Ritardo per permettere al browser di visualizzare l'elemento trascinato
+  setTimeout(() => {
+    this.style.opacity = '0.4';
+  }, 0);
+}
+
+function handleDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  return false;
+}
+
+function handleDragEnter(e) {
+  e.preventDefault();
+  this.classList.add('drag-over');
+}
+
+function handleDragLeave(e) {
+  this.classList.remove('drag-over');
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  
+  if (draggedItem === this) return;
+  
+  const dragEndIndex = parseInt(this.getAttribute('data-index'));
+  
+  // Ottieni gli ID originali degli elementi
+  const draggedId = parseInt(draggedItem.getAttribute('data-id'));
+  const targetId = parseInt(this.getAttribute('data-id'));
+  
+  // Trova gli indici nell'array originale
+  const draggedOriginalIndex = todos.findIndex(t => t.id === draggedId);
+  const targetOriginalIndex = todos.findIndex(t => t.id === targetId);
+  
+  if (draggedOriginalIndex !== -1 && targetOriginalIndex !== -1) {
+    // Sposta l'elemento nell'array
+    const [movedItem] = todos.splice(draggedOriginalIndex, 1);
+    todos.splice(targetOriginalIndex, 0, movedItem);
+    
+    // Salva e ri-renderizza
+    saveData();
+    renderTodos();
+  }
+  
+  this.classList.remove('drag-over');
+  return false;
+}
+
+function handleDragEnd(e) {
+  this.classList.remove('dragging');
+  this.style.opacity = '1';
+  
+  // Rimuovi la classe drag-over da tutti gli elementi
+  document.querySelectorAll('.task-item').forEach(item => {
+    item.classList.remove('drag-over');
+  });
+  
+  draggedItem = null;
+  dragStartIndex = null;
+}
+
+function addTodo() {
+  const input = document.getElementById('todoInput');
+  const text = input.value.trim();
+  
+  if (!text) return;
+  
+  const newTodo = {
+    id: Date.now(),
+    text,
+    completed: false,
+    created: new Date().toISOString().split('T')[0],
+    plannedDates: []
+  };
+  
+  todos.push(newTodo);
+  input.value = '';
+  saveData();
+  renderTodos();
+  updateStats();
+}
+
+function deleteTodo(index) {
+  if (confirm('Eliminare questa attività?')) {
+    todos.splice(index, 1);
+    saveData();
+    renderTodos();
+    renderCalendar();
+    renderPlannedTasks();
+    updateStats();
+  }
+}
+
+// Pianificazione attività
+function openPlanModal(index) {
+  const task = todos[index];
+  document.getElementById('planTaskIndex').value = index;
+  document.getElementById('planTaskText').textContent = task.text;
+  
+  // Genera i prossimi 14 giorni per la selezione
+  const datePicker = document.getElementById('datePicker');
+  datePicker.innerHTML = '';
+  
+  const today = new Date();
+  for (let i = 0; i < 14; i++) {
+    const date = new Date(today);
+    date.setDate(today.getDate() + i);
+    const dateStr = date.toISOString().split('T')[0];
+    const dayNames = ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'];
+    const dayName = dayNames[date.getDay()];
+    
+    const dateOption = document.createElement('div');
+    dateOption.className = 'date-option';
+    
+    const isChecked = task.plannedDates && task.plannedDates.includes(dateStr);
+    
+    dateOption.innerHTML = `
+      <input type="checkbox" id="date-${dateStr}" value="${dateStr}" ${isChecked ? 'checked' : ''}>
+      <label for="date-${dateStr}">${dayName} ${formatDate(dateStr)}</label>
+    `;
+    
+    datePicker.appendChild(dateOption);
+  }
+  
+  // Imposta le date personalizzate se esistono
+  if (task.plannedDates && task.plannedDates.length > 0) {
+    document.getElementById('customDates').value = task.plannedDates.join(', ');
+  } else {
+    document.getElementById('customDates').value = '';
+  }
+  
+  document.getElementById('planModal').classList.add('active');
+}
+
+function closePlanModal() {
+  document.getElementById('planModal').classList.remove('active');
+  document.getElementById('planTaskIndex').value = '-1';
+  document.getElementById('planTaskText').textContent = '';
+  document.getElementById('datePicker').innerHTML = '';
+  document.getElementById('customDates').value = '';
+}
+
+function saveTaskPlanning() {
+  const index = parseInt(document.getElementById('planTaskIndex').value);
+  if (index === -1) return;
+  
+  // Raccogli date selezionate
+  const selectedDates = [];
+  const checkboxes = document.querySelectorAll('#datePicker input[type="checkbox"]:checked');
+  checkboxes.forEach(cb => {
+    selectedDates.push(cb.value);
+  });
+  
+  // Aggiungi date personalizzate
+  const customDatesInput = document.getElementById('customDates').value.trim();
+  if (customDatesInput) {
+    const customDates = customDatesInput.split(',').map(d => d.trim()).filter(d => d);
+    customDates.forEach(date => {
+      if (!selectedDates.includes(date)) {
+        selectedDates.push(date);
+      }
+    });
+  }
+  
+  // Ordina le date
+  selectedDates.sort((a, b) => new Date(a) - new Date(b));
+  
+  // Aggiorna l'attività
+  todos[index].plannedDates = selectedDates;
+  
+  saveData();
+  closePlanModal();
+  renderTodos();
+  renderCalendar();
+  renderPlannedTasks();
+  updateStats();
+}
+
+// Visualizza attività pianificate per il giorno selezionato
+function renderPlannedTasks() {
+  const plannedTasksList = document.getElementById('plannedTasksList');
+  
+  if (!selectedDate) {
+    plannedTasksList.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon"><i class="fas fa-calendar-day"></i></div>
+        <div class="empty-text">Seleziona un giorno per vedere le attività pianificate</div>
+      </div>
+    `;
+    return;
+  }
+  
+  const tasksForDate = todos.filter(t => 
+    t.plannedDates && 
+    t.plannedDates.includes(selectedDate) && 
+    !t.completed
+  );
+  
+  if (tasksForDate.length === 0) {
+    plannedTasksList.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon"><i class="fas fa-tasks"></i></div>
+        <div class="empty-text">Nessuna attività pianificata per il ${formatDate(selectedDate)}</div>
+      </div>
+    `;
+    return;
+  }
+  
+  plannedTasksList.innerHTML = '';
+  
+  tasksForDate.forEach((task, index) => {
+    const originalIndex = todos.findIndex(t => t.id === task.id);
+    const taskItem = document.createElement('div');
+    taskItem.className = 'planned-task-item';
+    
+    taskItem.innerHTML = `
+      <div class="task-checkbox ${task.completed ? 'checked' : ''}" data-index="${originalIndex}"></div>
+      <div class="planned-task-content">
+        <div class="task-text">${task.text}</div>
+        <div class="task-meta">
+          <div class="task-date"><i class="far fa-calendar"></i> Creato: ${formatDate(task.created)}</div>
+          <div class="task-planned-dates"><i class="fas fa-calendar-check"></i> Pianificato per oggi</div>
+        </div>
+      </div>
+      <div class="planned-task-actions">
+        <button class="icon-btn" onclick="removeTaskFromDate(${originalIndex}, '${selectedDate}')" title="Rimuovi da oggi">
+          <i class="fas fa-calendar-minus"></i>
+        </button>
+        <button class="icon-btn delete-btn" onclick="deleteTodo(${originalIndex})">
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
+    `;
+    
+    plannedTasksList.appendChild(taskItem);
+  });
+  
+  document.querySelectorAll('#plannedTasksList .task-checkbox').forEach(checkbox => {
+    checkbox.addEventListener('click', function() {
+      const index = parseInt(this.getAttribute('data-index'));
+      todos[index].completed = !todos[index].completed;
+      saveData();
+      renderTodos();
+      renderCalendar();
+      renderPlannedTasks();
+    });
+  });
+}
+
+function removeTaskFromDate(taskIndex, date) {
+  const task = todos[taskIndex];
+  if (task.plannedDates) {
+    task.plannedDates = task.plannedDates.filter(d => d !== date);
+    saveData();
+    renderTodos();
+    renderCalendar();
+    renderPlannedTasks();
+    updateStats();
+  }
+}
+
+// FINANZE PERSONALI
+function updateFinanceStats() {
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
+  
+  // Filtra transazioni del mese corrente
+  const monthlyTransactions = transactions.filter(t => {
+    const transDate = new Date(t.date);
+    return transDate.getMonth() === currentMonth && 
+           transDate.getFullYear() === currentYear;
+  });
+  
+  const income = monthlyTransactions
+    .filter(t => t.type === 'income')
+    .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+  
+  const expense = monthlyTransactions
+    .filter(t => t.type === 'expense')
+    .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+  
+  const balance = income - expense;
+  
+  // Aggiorna UI con controllo di esistenza elementi
+  if(document.getElementById('monthlyIncome')) document.getElementById('monthlyIncome').textContent = `€${income.toFixed(2)}`;
+  if(document.getElementById('monthlyExpense')) document.getElementById('monthlyExpense').textContent = `€${expense.toFixed(2)}`;
+  if(document.getElementById('monthlyBalance')) document.getElementById('monthlyBalance').textContent = `€${balance.toFixed(2)}`;
+  if(document.getElementById('monthBalance')) document.getElementById('monthBalance').textContent = `€${balance.toFixed(2)}`;
+  
+  // Colore del bilancio
+  const monthBalanceEl = document.getElementById('monthBalance');
+  if (monthBalanceEl) {
+    monthBalanceEl.className = `stat-value ${balance >= 0 ? 'positive' : 'negative'}`;
+  }
+  
+  // Calcola progresso obiettivo
+  updateGoalProgress(balance);
+}
+
+function updateGoalProgress(currentSavings) {
+  const activeMonthlyGoals = goals.filter(g => 
+    g.period === 'monthly' && 
+    !g.completed && 
+    isGoalActive(g)
+  );
+  
+  if (activeMonthlyGoals.length > 0) {
+    // Calcola il progresso totale degli obiettivi mensili
+    let totalTarget = 0;
+    activeMonthlyGoals.forEach(goal => {
+      totalTarget += parseFloat(goal.targetAmount);
+    });
+    
+    const progress = totalTarget > 0 ? Math.min(Math.round((currentSavings / totalTarget) * 100), 100) : 0;
+    
+    if(document.getElementById('monthlyGoalProgress')) document.getElementById('monthlyGoalProgress').textContent = `${progress}%`;
+    if(document.getElementById('goalProgress')) document.getElementById('goalProgress').textContent = `${progress}%`;
+  } else {
+    if(document.getElementById('monthlyGoalProgress')) document.getElementById('monthlyGoalProgress').textContent = '0%';
+    if(document.getElementById('goalProgress')) document.getElementById('goalProgress').textContent = '0%';
+  }
+}
+
+function renderFinanceChart() {
+  if (!financeCtx) return;
+  
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
+  
+  // Raggruppa per categoria
+  const categories = {
+    'cibo': 0, 'trasporti': 0, 'casa': 0, 'shopping': 0,
+    'svago': 0, 'salute': 0, 'altro': 0
+  };
+  
+  transactions
+    .filter(t => t.type === 'expense')
+    .filter(t => {
+      const transDate = new Date(t.date);
+      return transDate.getMonth() === currentMonth && 
+             transDate.getFullYear() === currentYear;
+    })
+    .forEach(t => {
+      if (categories[t.category] !== undefined) {
+        categories[t.category] += parseFloat(t.amount);
+      }
+    });
+  
+  // Prepara dati per il grafico
+  const labels = ['Cibo', 'Trasporti', 'Casa', 'Shopping', 'Svago', 'Salute', 'Altro'];
+  const data = Object.values(categories);
+  const colors = [
+    '#3b82f6', '#8b5cf6', '#f59e0b', '#10b981',
+    '#ec4899', '#ef4444', '#64748b'
+  ];
+  
+  // Distruzione grafico esistente per evitare bug visuali
+  if (financeChart) {
+    financeChart.destroy();
+  }
+  
+  const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text');
+  
+  financeChart = new Chart(financeCtx, {
+    type: 'doughnut',
+    data: {
+      labels: labels,
+      datasets: [{
+        data: data,
+        backgroundColor: colors,
+        borderWidth: 2,
+        borderColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-secondary')
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'right',
+          labels: {
+            color: textColor,
+            font: {
+              size: 12
+            }
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const value = context.parsed;
+              const total = context.dataset.data.reduce((a, b) => a + b, 0);
+              const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+              return `€${value.toFixed(2)} (${percentage}%)`;
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+function renderTransactions(filter = 'all') {
+  const financeList = document.getElementById('financeList');
+  currentFilter = filter;
+  
+  // Aggiorna filtri attivi
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.classList.remove('active');
+    if (btn.getAttribute('data-filter') === filter) {
+      btn.classList.add('active');
+    }
+  });
+  
+  let filteredTransactions = [...transactions].reverse();
+  
+  if (filter === 'income') {
+    filteredTransactions = filteredTransactions.filter(t => t.type === 'income');
+  } else if (filter === 'expense') {
+    filteredTransactions = filteredTransactions.filter(t => t.type === 'expense');
+  } else if (filter !== 'all') {
+    filteredTransactions = filteredTransactions.filter(t => t.category === filter);
+  }
+  
+  if (filteredTransactions.length === 0) {
+    financeList.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon"><i class="fas fa-wallet"></i></div>
+        <div class="empty-text">${getEmptyMessage(filter)}</div>
+      </div>
+    `;
+    return;
+  }
+  
+  financeList.innerHTML = '';
+  
+  filteredTransactions.forEach((transaction, index) => {
+    const originalIndex = transactions.findIndex(t => 
+      t.id === transaction.id
+    );
+    
+    const transactionItem = document.createElement('div');
+    transactionItem.className = 'finance-item';
+    
+    const categoryNames = {
+      'cibo': 'Cibo', 'trasporti': 'Trasporti', 'casa': 'Casa',
+      'shopping': 'Shopping', 'svago': 'Svago', 'salute': 'Salute',
+      'stipendio': 'Stipendio', 'investimenti': 'Investimenti', 'altro': 'Altro'
+    };
+    
+    const categoryIcons = {
+      'cibo': '🍕', 'trasporti': '🚗', 'casa': '🏠',
+      'shopping': '🛍️', 'svago': '🎬', 'salute': '🏥',
+      'stipendio': '💰', 'investimenti': '📈', 'altro': '📋'
+    };
+    
+    transactionItem.innerHTML = `
+      <div class="finance-content">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <div>
+            <strong>${transaction.description}</strong>
+            <span class="finance-amount ${transaction.type}">
+              ${transaction.type === 'income' ? '+' : '-'}€${parseFloat(transaction.amount).toFixed(2)}
+            </span>
+          </div>
+          <span class="finance-date">${formatDate(transaction.date)}</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; margin-top: 8px;">
+          <span class="finance-category category-${transaction.category}">
+            ${categoryIcons[transaction.category]} ${categoryNames[transaction.category]}
+          </span>
+          <span class="finance-description">
+            ${transaction.type === 'income' ? 'Entrata' : 'Uscita'}
+          </span>
+        </div>
+      </div>
+      <div class="finance-actions">
+        <button class="icon-btn edit-btn" onclick="editTransaction(${originalIndex})">
+          <i class="fas fa-pencil-alt"></i>
+        </button>
+        <button class="icon-btn delete-btn" onclick="deleteTransaction(${originalIndex})">
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
+    `;
+    
+    financeList.appendChild(transactionItem);
+  });
+}
+
+function deleteTransaction(index) {
+  if (confirm('Eliminare questa transazione?')) {
+    transactions.splice(index, 1);
+    saveData();
+    renderTransactions(currentFilter);
+    renderGoals();
+  }
+}
+
+function getEmptyMessage(filter) {
+  const messages = {
+    'all': 'Nessuna transazione registrata',
+    'income': 'Nessuna entrata registrata',
+    'expense': 'Nessuna uscita registrata',
+    'cibo': 'Nessuna spesa per cibo',
+    'shopping': 'Nessuna spesa per shopping',
+    'casa': 'Nessuna spesa per casa',
+    'svago': 'Nessuna spesa per svago'
+  };
+  return messages[filter] || 'Nessuna transazione';
+}
+
+// Funzione per modificare transazione
+function editTransaction(index) {
+  const t = transactions[index];
+  document.getElementById('editTransactionIndex').value = index;
+  document.getElementById('transactionAmount').value = t.amount;
+  document.getElementById('transactionDescription').value = t.description;
+  document.getElementById('transactionCategory').value = t.category;
+  document.getElementById('transactionDate').value = t.date;
+  
+  if (t.type === 'income') {
+    document.getElementById('type-income').checked = true;
+  } else {
+    document.getElementById('type-expense').checked = true;
+  }
+  
+  document.querySelector('#transactionModal .modal-title').textContent = "Modifica Transazione";
+  document.getElementById('transactionModal').classList.add('active');
+}
+
+// OBIETTIVI DI RISPARMIO
+function updateGoalsStats() {
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
+  
+  // Filtra obiettivi attivi del mese corrente
+  const monthlyGoals = goals.filter(g => 
+    g.period === 'monthly' && 
+    !g.completed && 
+    isGoalActive(g)
+  );
+  
+  if (monthlyGoals.length === 0) {
+    if(document.getElementById('goalTarget')) document.getElementById('goalTarget').textContent = '€0';
+    if(document.getElementById('goalSaved')) document.getElementById('goalSaved').textContent = '€0';
+    if(document.getElementById('goalRemaining')) document.getElementById('goalRemaining').textContent = '€0';
+    if(document.getElementById('dailyPace')) document.getElementById('dailyPace').textContent = '€0/giorno';
+    return;
+  }
+  
+  // Calcola statistiche aggregate
+  let totalTarget = 0;
+  let totalSaved = 0;
+  
+  monthlyGoals.forEach(goal => {
+    totalTarget += parseFloat(goal.targetAmount);
+    totalSaved += calculateGoalProgress(goal);
+  });
+  
+  const remaining = Math.max(0, totalTarget - totalSaved);
+  
+  // Calcola giorni rimanenti nel mese
+  const endOfMonth = new Date(currentYear, currentMonth + 1, 0);
+  const daysRemaining = Math.ceil((endOfMonth - now) / (1000 * 60 * 60 * 24));
+  const dailyPace = daysRemaining > 0 ? (remaining / daysRemaining) : remaining;
+  
+  if(document.getElementById('goalTarget')) document.getElementById('goalTarget').textContent = `€${totalTarget.toFixed(2)}`;
+  if(document.getElementById('goalSaved')) document.getElementById('goalSaved').textContent = `€${totalSaved.toFixed(2)}`;
+  if(document.getElementById('goalRemaining')) document.getElementById('goalRemaining').textContent = `€${remaining.toFixed(2)}`;
+  if(document.getElementById('dailyPace')) document.getElementById('dailyPace').textContent = `€${dailyPace.toFixed(2)}/giorno`;
+}
+
+function calculateGoalProgress(goal) {
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
+  
+  // Per obiettivi mensili, usa il saldo attuale del mese
+  if (goal.period === 'monthly') {
+    const monthlyTransactions = transactions.filter(t => {
+      const transDate = new Date(t.date);
+      return transDate.getMonth() === currentMonth && 
+             transDate.getFullYear() === currentYear;
+    });
+    
+    const income = monthlyTransactions
+      .filter(t => t.type === 'income')
+      .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+    
+    const expense = monthlyTransactions
+      .filter(t => t.type === 'expense')
+      .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+    
+    const currentSavings = income - expense;
+    return Math.max(0, currentSavings);
+  }
+  
+  return 0;
+}
+
+function isGoalActive(goal) {
+  const now = new Date();
+  
+  if (goal.completed) return false;
+  
+  if (goal.period === 'monthly') {
+    const goalMonth = new Date(goal.createdAt).getMonth();
+    const goalYear = new Date(goal.createdAt).getFullYear();
+    return now.getMonth() === goalMonth && now.getFullYear() === goalYear;
+  }
+  
+  if (goal.period === 'custom' && goal.endDate) {
+    const endDate = new Date(goal.endDate);
+    return now <= endDate;
+  }
+  
+  return true;
+}
+
+function getGoalStatus(goal) {
+  const progress = calculateGoalProgress(goal);
+  const target = parseFloat(goal.targetAmount);
+  const percentage = target > 0 ? (progress / target) * 100 : 0;
+  
+  if (percentage >= 100) return 'completed';
+  
+  const now = new Date();
+  let totalDays, daysPassed;
+  
+  if (goal.period === 'monthly') {
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    totalDays = Math.ceil((endOfMonth - startOfMonth) / (1000 * 60 * 60 * 24));
+    daysPassed = Math.ceil((now - startOfMonth) / (1000 * 60 * 60 * 24));
+  } else if (goal.period === 'custom' && goal.endDate && goal.startDate) {
+    const startDate = new Date(goal.startDate);
+    const endDate = new Date(goal.endDate);
+    totalDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+    daysPassed = Math.ceil((now - startDate) / (1000 * 60 * 60 * 24));
+  } else {
+    return 'ontrack';
+  }
+  
+  const expectedPercentage = (daysPassed / totalDays) * 100;
+  
+  if (percentage >= expectedPercentage * 0.9) return 'ontrack';
+  if (percentage >= expectedPercentage * 0.7) return 'atrisk';
+  return 'behind';
+}
+
+function renderGoalsChart() {
+  const activeGoals = goals.filter(g => !g.completed && isGoalActive(g));
+  const container = document.getElementById('goalsChart').parentElement;
+  
+  if (activeGoals.length === 0) {
+    if (goalsChart) {
+      goalsChart.destroy();
+      goalsChart = null;
+    }
+    // Sostituiamo il contenuto ma manteniamo il canvas se necessario
+    // In questo caso distruggiamo il grafico e mostriamo il messaggio
+    const oldCanvas = document.getElementById('goalsChart');
+    if(oldCanvas) oldCanvas.style.display = 'none';
+    
+    // Controlliamo se esiste già il messaggio
+    if(!document.getElementById('noGoalsMsg')) {
+        const msgDiv = document.createElement('div');
+        msgDiv.id = 'noGoalsMsg';
+        msgDiv.style.cssText = "display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text-muted);";
+        msgDiv.innerHTML = `
+            <div style="text-align: center;">
+            <i class="fas fa-bullseye" style="font-size: 48px; margin-bottom: 10px; opacity: 0.5;"></i>
+            <p>Nessun obiettivo attivo</p>
+            </div>
+        `;
+        container.appendChild(msgDiv);
+    }
+    return;
+  }
+  
+  // Se ci sono obiettivi, rimuoviamo il messaggio e mostriamo il canvas
+  const msgDiv = document.getElementById('noGoalsMsg');
+  if(msgDiv) msgDiv.remove();
+  
+  const canvas = document.getElementById('goalsChart');
+  canvas.style.display = 'block';
+  
+  const labels = activeGoals.map(g => g.name.substring(0, 15) + (g.name.length > 15 ? '...' : ''));
+  const progress = activeGoals.map(g => calculateGoalProgress(g));
+  const targets = activeGoals.map(g => parseFloat(g.targetAmount));
+  const percentages = activeGoals.map((g, i) => 
+    targets[i] > 0 ? Math.min((progress[i] / targets[i]) * 100, 100) : 0
+  );
+  
+  const colors = [
+    '#ec4899', '#8b5cf6', '#3b82f6', '#10b981',
+    '#f59e0b', '#ef4444', '#06b6d4', '#84cc16'
+  ];
+  
+  // Fix grafico obiettivi
+  if (goalsChart) {
+    goalsChart.destroy();
+  }
+  
+  const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text');
+  
+  goalsChart = new Chart(goalsCtx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Progresso',
+          data: progress,
+          backgroundColor: colors,
+          borderColor: colors.map(c => c + 'CC'),
+          borderWidth: 1,
+          borderRadius: 6
+        },
+        {
+          label: 'Obiettivo',
+          data: targets,
+          type: 'line',
+          borderColor: '#ffffff',
+          borderWidth: 2,
+          pointBackgroundColor: '#ffffff',
+          pointRadius: 4,
+          fill: false
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            color: textColor,
+            callback: function(value) {
+              return '€' + value;
+            }
+          },
+          grid: {
+            color: 'rgba(255, 255, 255, 0.1)'
+          }
+        },
+        x: {
+          ticks: {
+            color: textColor,
+            maxRotation: 45,
+            minRotation: 45
+          },
+          grid: {
+            display: false
+          }
+        }
+      },
+      plugins: {
+        legend: {
+          display: false
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const label = context.dataset.label || '';
+              const value = context.parsed.y;
+              const index = context.dataIndex;
+              
+              if (context.datasetIndex === 0) {
+                const percentage = percentages[index];
+                return `${label}: €${value.toFixed(2)} (${percentage.toFixed(1)}%)`;
+              }
+              return `${label}: €${value.toFixed(2)}`;
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+function renderGoals() {
+  const goalsList = document.getElementById('goalsList');
+  
+  const activeGoals = goals.filter(g => !g.completed);
+  const completedGoals = goals.filter(g => g.completed);
+  
+  if (activeGoals.length === 0 && completedGoals.length === 0) {
+    goalsList.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon"><i class="fas fa-bullseye"></i></div>
+        <div class="empty-text">Nessun obiettivo di risparmio impostato</div>
+        <button class="btn btn-goal" onclick="openGoalModal()" style="margin-top: 15px;">
+          <i class="fas fa-plus-circle"></i> Crea il primo obiettivo
+        </button>
+      </div>
+    `;
+    return;
+  }
+  
+  goalsList.innerHTML = '';
+  
+  // Mostra prima gli obiettivi attivi
+  activeGoals.forEach((goal, index) => {
+    const progress = calculateGoalProgress(goal);
+    const target = parseFloat(goal.targetAmount);
+    const percentage = target > 0 ? Math.min((progress / target) * 100, 100) : 0;
+    const status = getGoalStatus(goal);
+    const statusText = {
+      'ontrack': 'In linea',
+      'atrisk': 'A rischio',
+      'behind': 'In ritardo',
+      'completed': 'Completato'
+    };
+    
+    const statusClass = {
+      'ontrack': 'status-ontrack',
+      'atrisk': 'status-atrisk',
+      'behind': 'status-behind',
+      'completed': 'status-completed'
+    };
+    
+    const categoryIcons = {
+      'vacanza': '🏖️', 'auto': '🚗', 'casa': '🏠',
+      'investimenti': '📈', 'emergenza': '🚨', 'hobby': '🎨',
+      'studio': '📚', 'altro': '🎯'
+    };
+    
+    const goalItem = document.createElement('div');
+    goalItem.className = `goal-item ${status}`;
+    
+    goalItem.innerHTML = `
+      <div class="goal-content">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+          <div>
+            <strong>${categoryIcons[goal.category]} ${goal.name}</strong>
+            <span class="goal-status ${statusClass[status]}">${statusText[status]}</span>
+          </div>
+          <span class="goal-amount">€${progress.toFixed(2)}/€${target.toFixed(2)}</span>
+        </div>
+        
+        <div class="goal-progress">
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: ${percentage}%"></div>
+          </div>
+          <div class="progress-text">
+            <span>${percentage.toFixed(1)}% completato</span>
+            <span>${goal.period === 'monthly' ? 'Mensile' : goal.period === 'yearly' ? 'Annuale' : 'Personalizzato'}</span>
+          </div>
+        </div>
+        
+        <div class="goal-days-left">
+          ${goal.description ? `<div style="font-size: 13px; color: var(--text-muted); margin-top: 5px;">${goal.description}</div>` : ''}
+          <div style="display: flex; justify-content: space-between; margin-top: 8px;">
+            <span><i class="far fa-calendar"></i> Creato: ${formatDate(goal.createdAt)}</span>
+            ${goal.priority === 'high' ? '<span style="color: #ef4444;"><i class="fas fa-exclamation-circle"></i> Alta priorità</span>' : 
+              goal.priority === 'medium' ? '<span style="color: #f59e0b;"><i class="fas fa-info-circle"></i> Media priorità</span>' :
+              '<span style="color: #10b981;"><i class="fas fa-check-circle"></i> Bassa priorità</span>'}
+          </div>
+        </div>
+      </div>
+      <div class="goal-actions">
+        <button class="icon-btn" onclick="toggleGoalCompletion(${index})" title="Segna come completato">
+          <i class="fas fa-check"></i>
+        </button>
+        <button class="icon-btn delete-btn" onclick="deleteGoal(${index})">
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
+    `;
+    
+    goalsList.appendChild(goalItem);
+  });
+  
+  // Mostra gli obiettivi completati in una sezione separata
+  if (completedGoals.length > 0) {
+    const completedHeader = document.createElement('div');
+    completedHeader.innerHTML = `<h3 style="margin: 20px 0 10px 0; color: var(--text-muted); font-size: 14px; text-transform: uppercase;">Obiettivi Completati</h3>`;
+    goalsList.appendChild(completedHeader);
+    
+    completedGoals.forEach((goal, index) => {
+      const originalIndex = goals.findIndex(g => g.id === goal.id);
+      const target = parseFloat(goal.targetAmount);
+      
+      const goalItem = document.createElement('div');
+      goalItem.className = 'goal-item completed';
+      goalItem.style.opacity = '0.7';
+      
+      goalItem.innerHTML = `
+        <div class="goal-content">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+              <strong><i class="fas fa-check-circle" style="color: var(--success);"></i> ${goal.name}</strong>
+              <span class="goal-status status-completed">Completato</span>
+            </div>
+            <span class="goal-amount" style="color: var(--success);">€${target.toFixed(2)}</span>
+          </div>
+          <div style="font-size: 13px; color: var(--text-muted); margin-top: 5px;">
+            ${goal.description || ''}
+          </div>
+        </div>
+        <div class="goal-actions">
+          <button class="icon-btn delete-btn" onclick="deleteGoal(${originalIndex})">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      `;
+      
+      goalsList.appendChild(goalItem);
+    });
+  }
+}
+
+// SEZIONE NOTE CON LINK, FILE E CARTELLE
+function renderFolders() {
+  const foldersContainer = document.getElementById('foldersContainer');
+  const folderSelect = document.getElementById('noteFolder');
+  
+  // Render cartelle come tabs
+  foldersContainer.innerHTML = '';
+  
+  folders.forEach(folder => {
+    const folderTab = document.createElement('button');
+    folderTab.className = `folder-tab ${currentFolder === folder.id ? 'active' : ''}`;
+    folderTab.innerHTML = `
+      <i class="${folder.icon}"></i>
+      <span>${folder.name}</span>
+      ${folder.id !== 'all' && folder.id !== 'uncategorized' ? 
+        `<span class="badge">${notes.filter(n => n.folderId === folder.id).length}</span>` : ''}
+    `;
+    folderTab.addEventListener('click', () => switchFolder(folder.id));
+    foldersContainer.appendChild(folderTab);
+  });
+  
+  // Aggiungi cartelle al select
+  folderSelect.innerHTML = '<option value="">Nessuna cartella</option>';
+  folders.filter(f => f.id !== 'all' && f.id !== 'uncategorized').forEach(folder => {
+    const option = document.createElement('option');
+    option.value = folder.id;
+    option.textContent = folder.name;
+    folderSelect.appendChild(option);
+  });
+}
+
+function switchFolder(folderId) {
+  currentFolder = folderId;
+  renderFolders();
+  renderNotes();
+}
+
+function openFolderModal() {
+  document.getElementById('folderModal').classList.add('active');
+  document.getElementById('folderName').value = '';
+  document.getElementById('folderColor').value = '#3b82f6';
+  document.getElementById('folderIcon').value = 'fas fa-folder';
+  
+  // Reset color selection
+  document.querySelectorAll('.folder-color-option').forEach(opt => {
+    opt.classList.remove('selected');
+  });
+  document.querySelector('.folder-color-option[data-color="#3b82f6"]').classList.add('selected');
+}
+
+function closeFolderModal() {
+  document.getElementById('folderModal').classList.remove('active');
+}
+
+function selectColor(element) {
+  document.querySelectorAll('.folder-color-option').forEach(opt => {
+    opt.classList.remove('selected');
+  });
+  element.classList.add('selected');
+  document.getElementById('folderColor').value = element.getAttribute('data-color');
+}
+
+function createFolder() {
+  const name = document.getElementById('folderName').value.trim();
+  const color = document.getElementById('folderColor').value;
+  const icon = document.getElementById('folderIcon').value;
+  
+  if (!name) {
+    alert('Inserisci un nome per la cartella');
+    return;
+  }
+  
+  const folder = {
+    id: 'folder_' + Date.now(),
+    name,
+    color,
+    icon,
+    createdAt: new Date().toISOString()
+  };
+  
+  folders.push(folder);
+  saveData();
+  closeFolderModal();
+  renderFolders();
+}
+
+// Funzioni per file
+function validateFile(file) {
+  const maxSize = 10 * 1024 * 1024; // 10MB per file più grandi
+  
+  // Estensione del file
+  const ext = file.name.split('.').pop().toLowerCase();
+  
+  // Estensioni PERICOLOSE che NON vogliamo
+  const dangerousExtensions = [
+    'exe', 'bat', 'cmd', 'ps1', 'sh', 'bash', // Eseguibili
+    'js', 'vbs', 'jar', 'msi', 'dmg', // Script ed eseguibili
+    'php', 'asp', 'aspx', 'jsp', // Script server
+    'lnk', 'scr', 'pif', 'com' // Collegamenti pericolosi
+  ];
+  
+  // Se è un'estensione pericolosa, bloccalo
+  if (dangerousExtensions.includes(ext)) {
+    alert(`Il file "${file.name}" ha un'estensione potenzialmente pericolosa (.${ext}) e non può essere caricato per motivi di sicurezza.`);
+    return false;
+  }
+  
+  if (file.size > maxSize) {
+    alert(`Il file "${file.name}" è troppo grande. Dimensione: ${(file.size / (1024 * 1024)).toFixed(2)}MB (max: 10MB)`);
+    return false;
+  }
+  
+  // Estensioni COMUNI che accettiamo
+  const commonExtensions = [
+    // Documenti
+    'pdf', 'doc', 'docx', 'odt', 'rtf', 'txt',
+    // Fogli di calcolo
+    'xls', 'xlsx', 'ods', 'csv',
+    // Presentazioni
+    'ppt', 'pptx', 'odp',
+    // Immagini
+    'jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg', 'ico',
+    // Archivi
+    'zip', 'rar', '7z', 'tar', 'gz',
+    // Web
+    'html', 'htm', 'css', 'xml', 'json',
+    // Altro
+    'mp3', 'wav', 'mp4', 'avi', 'mov', 'mkv'
+  ];
+  
+  // Se è un'estensione comune, accettalo
+  if (commonExtensions.includes(ext)) {
+    return true;
+  }
+  
+  // Se il tipo MIME è text/ o image/ o application/pdf, accettalo
+  if (file.type) {
+    if (file.type.startsWith('text/') || 
+        file.type.startsWith('image/') || 
+        file.type === 'application/pdf' ||
+        file.type.startsWith('application/vnd.openxmlformats') ||
+        file.type.startsWith('application/vnd.ms-') ||
+        file.type.startsWith('application/zip') ||
+        file.type.startsWith('audio/') ||
+        file.type.startsWith('video/')) {
+      return true;
+    }
+  }
+  
+  // Chiedi conferma per file sconosciuti
+  const confirmUpload = confirm(
+    `Il file "${file.name}" ha un formato non comune.\n` +
+    `Estensione: .${ext}\n` +
+    `Tipo: ${file.type || 'sconosciuto'}\n` +
+    `Dimensione: ${(file.size / 1024).toFixed(1)}KB\n\n` +
+    `Vuoi comunque caricarlo?`
+  );
+  
+  return confirmUpload;
+}
+
+function handleFileSelect(event) {
+  const files = Array.from(event.target.files);
+  const validFiles = files.filter(validateFile);
+  selectedFiles = [...selectedFiles, ...validFiles];
+  renderSelectedFiles();
+}
+
+function renderSelectedFiles() {
+  const container = document.getElementById('selectedFiles');
+  container.innerHTML = '';
+  
+  selectedFiles.forEach((file, index) => {
+    const fileTag = document.createElement('div');
+    fileTag.className = 'file-tag';
+    fileTag.innerHTML = `
+      <span>${file.name}</span>
+      <button onclick="removeFile(${index})">&times;</button>
+    `;
+    container.appendChild(fileTag);
+  });
+}
+
+function removeFile(index) {
+  selectedFiles.splice(index, 1);
+  renderSelectedFiles();
+}
+
+function getFileIcon(filename) {
+  const ext = filename.split('.').pop().toLowerCase();
+  const icons = {
+    'pdf': 'fas fa-file-pdf',
+    'doc': 'fas fa-file-word',
+    'docx': 'fas fa-file-word',
+    'xls': 'fas fa-file-excel',
+    'xlsx': 'fas fa-file-excel',
+    'ppt': 'fas fa-file-powerpoint',
+    'pptx': 'fas fa-file-powerpoint',
+    'jpg': 'fas fa-file-image',
+    'jpeg': 'fas fa-file-image',
+    'png': 'fas fa-file-image',
+    'gif': 'fas fa-file-image',
+    'txt': 'fas fa-file-alt',
+    'zip': 'fas fa-file-archive',
+    'rar': 'fas fa-file-archive'
+  };
+  return icons[ext] || 'fas fa-file';
+}
+
+function getFileSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+function downloadFile(filename, noteIndex, fileIndex) {
+  const note = notes[noteIndex];
+  const file = note.files[fileIndex];
+  
+  if (file.data) {
+    try {
+      // Estrai il tipo MIME e i dati base64
+      const dataParts = file.data.split(',');
+      const mimeType = dataParts[0].match(/:(.*?);/)[1];
+      const base64Data = dataParts[1];
+      
+      // Converti base64 in binario
+      const byteCharacters = atob(base64Data);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      
+      // Crea blob e scarica
+      const blob = new Blob([byteArray], { type: mimeType });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      
+      // Pulizia
+      setTimeout(() => {
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      }, 100);
+      
+    } catch (error) {
+      console.error('Errore nel download del file:', error);
+      alert('Errore nel download del file. Riprova.');
+    }
+  } else {
+    alert(`Il file "${filename}" non contiene dati scaricabili.`);
+  }
+}
+
+function renderNotes() {
+  const notesList = document.getElementById('notesList');
+  
+  // Filtra note in base alla cartella corrente
+  let filteredNotes = notes;
+  
+  if (currentFolder === 'uncategorized') {
+    filteredNotes = notes.filter(note => !note.folderId);
+  } else if (currentFolder !== 'all') {
+    filteredNotes = notes.filter(note => note.folderId === currentFolder);
+  }
+  
+  if (filteredNotes.length === 0) {
+    const folder = folders.find(f => f.id === currentFolder);
+    notesList.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon"><i class="fas fa-sticky-note"></i></div>
+        <div class="empty-text">
+          ${currentFolder === 'all' ? 'Nessuna nota personale' : 
+            currentFolder === 'uncategorized' ? 'Nessuna nota senza cartella' : 
+            `Nessuna nota nella cartella "${folder?.name}"`}
+        </div>
+      </div>
+    `;
+    return;
+  }
+  
+  notesList.innerHTML = '';
+  
+  filteredNotes.slice().reverse().forEach((note, index) => {
+    const originalIndex = notes.findIndex(n => n.id === note.id);
+    const noteItem = document.createElement('div');
+    noteItem.className = 'note-item';
+    
+    // Trova la cartella della nota
+    const folder = folders.find(f => f.id === note.folderId);
+    
+    // Usa linkify per convertire URL in link cliccabili
+    const noteContent = linkify(note.text);
+    
+    noteItem.innerHTML = `
+      <div class="note-content">
+        ${folder ? `<div class="note-folder" style="background: ${folder.color};">${folder.name}</div>` : ''}
+        <div class="note-text">${noteContent.replace(/\n/g, '<br>')}</div>
+        
+        ${note.files && note.files.length > 0 ? `
+          <div class="note-files" style="margin-top: 15px;">
+            ${note.files.map(file => `
+              <div class="file-attachment">
+                <div class="file-icon">
+                  <i class="${getFileIcon(file.name)}"></i>
+                </div>
+                <div class="file-info">
+                  <div class="file-name">${file.name}</div>
+                  <div class="file-size">${getFileSize(file.size)}</div>
+                  ${!file.data ? '<div style="color: var(--warning); font-size: 11px;">File non scaricabile</div>' : ''}
+                </div>
+                ${file.data ? `
+                  <div class="file-download" onclick="downloadFile('${file.name}', ${originalIndex}, ${note.files.indexOf(file)})">
+                    <i class="fas fa-download"></i>
+                  </div>
+                ` : ''}
+              </div>
+              ${file.type && file.type.startsWith('image/') && file.preview ? 
+                `<img src="${file.preview}" alt="${file.name}" class="file-preview">` : ''}
+            `).join('')}
+          </div>
+        ` : ''}
+        
+        <div class="note-date">
+          <i class="far fa-calendar"></i> ${formatDateTime(note.createdAt)}
+        </div>
+      </div>
+      <div class="note-actions">
+        ${folder ? `<button class="icon-btn" onclick="removeFromFolder(${originalIndex})" title="Rimuovi dalla cartella">
+          <i class="fas fa-folder-minus"></i>
+        </button>` : ''}
+        <button class="icon-btn delete-btn" onclick="deleteNote(${originalIndex})">
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
+    `;
+    
+    notesList.appendChild(noteItem);
+  });
+}
+
+function addNote() {
+  const input = document.getElementById('noteInput');
+  const folderSelect = document.getElementById('noteFolder');
+  const text = input.value.trim();
+  
+  if (!text && selectedFiles.length === 0) {
+    alert('Aggiungi testo o almeno un file');
+    return;
+  }
+  
+  const note = {
+    id: Date.now(),
+    text,
+    folderId: folderSelect.value || null,
+    createdAt: new Date().toISOString(),
+    files: []
+  };
+  
+  // Processa ogni file selezionato
+  const processFiles = selectedFiles.map(file => {
+    return new Promise((resolve) => {
+      const fileInfo = {
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        lastModified: file.lastModified,
+      };
+      
+      // Leggi il file come base64 per il download
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        fileInfo.data = e.target.result;
+        
+        // Se è un'immagine, crea anche un preview
+        if (file.type.startsWith('image/')) {
+          fileInfo.preview = e.target.result;
+        }
+        
+        resolve(fileInfo);
+      };
+      reader.onerror = function() {
+        // Se c'è un errore nella lettura, salva solo le info
+        console.error('Errore nella lettura del file:', file.name);
+        resolve(fileInfo);
+      };
+      reader.readAsDataURL(file);
+    });
+  });
+  
+  // Attendi che tutti i file vengano processati
+  Promise.all(processFiles).then(fileInfos => {
+    note.files = fileInfos;
+    notes.push(note);
+    
+    input.value = '';
+    selectedFiles = [];
+    document.getElementById('selectedFiles').innerHTML = '';
+    folderSelect.value = '';
+    
+    saveData();
+    renderNotes();
+  }).catch(error => {
+    console.error('Errore nel processare i file:', error);
+    alert('Errore nel processare i file. Riprova.');
+  });
+}
+
+function deleteNote(index) {
+  if (confirm('Eliminare questa nota?')) {
+    notes.splice(index, 1);
+    saveData();
+    renderNotes();
+  }
+}
+
+function removeFromFolder(noteIndex) {
+  notes[noteIndex].folderId = null;
+  saveData();
+  renderNotes();
+}
+
+// Modal functions
+function openTransactionModal() {
+  document.getElementById('editTransactionIndex').value = "-1";
+  document.querySelector('#transactionModal .modal-title').textContent = "Nuova Transazione";
+  document.getElementById('transactionModal').classList.add('active');
+  document.getElementById('transactionDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('transactionAmount').value = '';
+  document.getElementById('transactionDescription').value = '';
+  document.getElementById('transactionCategory').value = 'cibo';
+  document.getElementById('type-income').checked = true;
+  document.getElementById('transactionAmount').focus();
+}
+
+function closeTransactionModal() {
+  document.getElementById('transactionModal').classList.remove('active');
+}
+
+function openGoalModal() {
+  document.getElementById('goalModal').classList.add('active');
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('goalStartDate').value = today;
+  
+  const endOfMonth = new Date();
+  endOfMonth.setMonth(endOfMonth.getMonth() + 1);
+  endOfMonth.setDate(0);
+  document.getElementById('goalEndDate').value = endOfMonth.toISOString().split('T')[0];
+  
+  document.getElementById('goalName').focus();
+}
+
+function closeGoalModal() {
+  document.getElementById('goalModal').classList.remove('active');
+  document.getElementById('goalName').value = '';
+  document.getElementById('goalTargetAmount').value = '';
+  document.getElementById('goalPeriod').value = 'monthly';
+  document.getElementById('goalPriority').value = 'medium';
+  document.getElementById('goalCategory').value = 'vacanza';
+  document.getElementById('goalDescription').value = '';
+  document.getElementById('customDateRange').style.display = 'none';
+}
+
+function saveTransaction() {
+  const amount = document.getElementById('transactionAmount').value;
+  const description = document.getElementById('transactionDescription').value.trim();
+  const category = document.getElementById('transactionCategory').value;
+  const date = document.getElementById('transactionDate').value;
+  const type = document.querySelector('input[name="transactionType"]:checked').value;
+  const editIndex = parseInt(document.getElementById('editTransactionIndex').value);
+  
+  if (!amount || parseFloat(amount) <= 0 || !description) {
+    alert('Per favore inserisci un importo valido e una descrizione');
+    return;
+  }
+  
+  if (editIndex > -1) {
+    // Modifica transazione esistente
+    transactions[editIndex].amount = parseFloat(amount).toFixed(2);
+    transactions[editIndex].description = description;
+    transactions[editIndex].category = category;
+    transactions[editIndex].date = date;
+    transactions[editIndex].type = type;
+  } else {
+    // Crea nuova transazione
+    const transaction = {
+      id: Date.now(),
+      amount: parseFloat(amount).toFixed(2),
+      description,
+      category,
+      date,
+      type,
+      createdAt: new Date().toISOString()
+    };
+    transactions.push(transaction);
+  }
+  renderGoals();
+  saveData();
+  closeTransactionModal();
+  renderTransactions(currentFilter);
+}
+
+function addGoal() {
+  const name = document.getElementById('goalName').value.trim();
+  const targetAmount = document.getElementById('goalTargetAmount').value;
+  const period = document.getElementById('goalPeriod').value;
+  const priority = document.getElementById('goalPriority').value;
+  const category = document.getElementById('goalCategory').value;
+  const description = document.getElementById('goalDescription').value.trim();
+  
+  if (!name || !targetAmount || parseFloat(targetAmount) <= 0) {
+    alert('Per favore inserisci un nome e un importo obiettivo validi');
+    return;
+  }
+  
+  const goal = {
+    id: Date.now(),
+    name,
+    targetAmount: parseFloat(targetAmount),
+    period,
+    priority,
+    category,
+    description,
+    completed: false,
+    createdAt: new Date().toISOString()
+  };
+  
+  if (period === 'custom') {
+    const startDate = document.getElementById('goalStartDate').value;
+    const endDate = document.getElementById('goalEndDate').value;
+    
+    if (!startDate || !endDate || new Date(endDate) <= new Date(startDate)) {
+      alert('Per favore inserisci un intervallo di date valido');
+      return;
+    }
+    
+    goal.startDate = startDate;
+    goal.endDate = endDate;
+  }
+  
+  goals.push(goal);
+  saveData();
+  closeGoalModal();
+  renderGoals();
+}
+
+function toggleGoalCompletion(index) {
+  goals[index].completed = !goals[index].completed;
+  saveData();
+  renderGoals();
+}
+
+function deleteGoal(index) {
+  if (confirm('Eliminare questo obiettivo?')) {
+    goals.splice(index, 1);
+    saveData();
+    renderGoals();
+  }
+}
+
+// Funzioni di utilità
+function formatDate(dateString) {
+  const date = new Date(dateString);
+  const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+  return date.toLocaleDateString('it-IT', options);
+}
+
+function formatDateTime(dateString) {
+  const date = new Date(dateString);
+  const options = { 
+    day: '2-digit', 
+    month: '2-digit', 
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  };
+  return date.toLocaleDateString('it-IT', options);
+}
+
+// CALENDARIO AVANZATO CON ATTIVITÀ PIANIFICATE
+function renderCalendar() {
+  const calendar = document.getElementById('calendar');
+  const monthYear = document.getElementById('currentMonth');
+  
+  const weekdays = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'];
+  calendar.innerHTML = '';
+  
+  weekdays.forEach(day => {
+    const dayElement = document.createElement('div');
+    dayElement.className = 'calendar-day header';
+    dayElement.textContent = day;
+    calendar.appendChild(dayElement);
+  });
+  
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  const daysInMonth = lastDay.getDate();
+  const startingDay = (firstDay.getDay() + 6) % 7;
+  
+  const monthNames = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno',
+                     'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
+  monthYear.textContent = `${monthNames[month]} ${year}`;
+  
+  for (let i = 0; i < startingDay; i++) {
+    const emptyDay = document.createElement('div');
+    emptyDay.className = 'calendar-day';
+    calendar.appendChild(emptyDay);
+  }
+  
+  const today = new Date();
+  const todayStr = today.toISOString().split('T')[0];
+  const selectedDateStr = selectedDate;
+  
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dayElement = document.createElement('div');
+    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    
+    dayElement.className = 'calendar-day';
+    dayElement.setAttribute('data-date', dateStr);
+    
+    // Conteggio eventi e attività
+    const hasEvent = events.some(event => matchesDate(event, dateStr));
+    const hasTask = todos.some(task => 
+      task.plannedDates && 
+      task.plannedDates.includes(dateStr) && 
+      !task.completed
+    );
+    
+    // Aggiungi classi per indicatori
+    if (hasEvent && hasTask) {
+      dayElement.classList.add('has-both');
+    } else if (hasEvent) {
+      dayElement.classList.add('has-event');
+      
+      const eventTypes = events
+        .filter(event => matchesDate(event, dateStr))
+        .map(event => event.repeat);
+      
+      if (eventTypes.includes('daily')) dayElement.classList.add('daily');
+      else if (eventTypes.includes('weekly')) dayElement.classList.add('weekly');
+      else if (eventTypes.includes('monthly')) dayElement.classList.add('monthly');
+    } else if (hasTask) {
+      dayElement.classList.add('has-task');
+    }
+    
+    // Conta attività ed eventi
+    const taskCount = todos.filter(task => 
+      task.plannedDates && 
+      task.plannedDates.includes(dateStr) && 
+      !task.completed
+    ).length;
+    
+    const eventCount = events.filter(event => matchesDate(event, dateStr)).length;
+    
+    dayElement.innerHTML = `
+      <div class="calendar-day-number">${day}</div>
+      ${taskCount > 0 ? `<div class="calendar-day-tasks">${taskCount} attività</div>` : ''}
+      ${eventCount > 0 ? `<div class="calendar-day-events">${eventCount} eventi</div>` : ''}
+    `;
+    
+    if (dateStr === todayStr) {
+      dayElement.classList.add('today');
+    }
+    
+    if (dateStr === selectedDateStr) {
+      dayElement.classList.add('selected');
+    }
+    
+    dayElement.addEventListener('click', function() {
+      selectedDate = this.getAttribute('data-date');
+      calendarFilter = selectedDate;
+      document.getElementById('eventDate').value = selectedDate;
+      renderCalendar();
+      renderEvents();
+      renderPlannedTasks();
+    });
+    
+    calendar.appendChild(dayElement);
+  }
+}
+
+function matchesDate(event, dateStr) {
+  if (event.repeat === 'none') return event.date === dateStr;
+  
+  const eventDate = new Date(event.date);
+  const d = new Date(dateStr);
+  
+  if (d < eventDate) return false;
+  
+  if (event.repeat === 'daily') return true;
+  
+  if (event.repeat === 'weekly') {
+    const evDay = (eventDate.getDay() + 6) % 7;
+    const checkDay = (d.getDay() + 6) % 7;
+    return evDay === checkDay;
+  }
+  
+  if (event.repeat === 'monthly') {
+    return eventDate.getDate() === d.getDate();
+  }
+  
+  return false;
+}
+
+function renderEvents() {
+  const eventList = document.getElementById('eventList');
+  
+  let filteredEvents = events;
+  if (calendarFilter) {
+    filteredEvents = events.filter(event => matchesDate(event, calendarFilter));
+  }
+  
+  if (filteredEvents.length === 0) {
+    eventList.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon"><i class="far fa-calendar"></i></div>
+        <div class="empty-text">${calendarFilter ? 'Nessun evento per questa data' : 'Nessun evento pianificato'}</div>
+      </div>
+    `;
+    return;
+  }
+  
+  eventList.innerHTML = '';
+  
+  filteredEvents.sort((a, b) => {
+    if (a.date === b.date) {
+      return (a.time || '00:00').localeCompare(b.time || '00:00');
+    }
+    return a.date.localeCompare(b.date);
+  });
+  
+  filteredEvents.forEach((event, index) => {
+    const eventItem = document.createElement('div');
+    eventItem.className = `task-item ${event.completed ? 'completed' : ''}`;
+    
+    let repeatIcon = 'fas fa-repeat';
+    let repeatText = 'Non ripetere';
+    
+    if (event.repeat === 'daily') {
+      repeatIcon = 'fas fa-sun';
+      repeatText = 'Giornaliero';
+    } else if (event.repeat === 'weekly') {
+      repeatIcon = 'fas fa-calendar-week';
+      repeatText = 'Settimanale';
+    } else if (event.repeat === 'monthly') {
+      repeatIcon = 'fas fa-calendar-alt';
+      repeatText = 'Mensile';
+    }
+    
+    eventItem.innerHTML = `
+      <div class="task-checkbox ${event.completed ? 'checked' : ''}" data-event-index="${index}"></div>
+      <div class="task-content">
+        <div class="task-text ${event.completed ? 'task-completed' : ''}">${event.text}</div>
+        <div class="task-meta">
+          <div class="task-date"><i class="far fa-calendar"></i> ${formatDate(event.date)}</div>
+          ${event.time ? `<div class="task-time"><i class="far fa-clock"></i> ${event.time}</div>` : ''}
+          <div class="task-repeat"><i class="${repeatIcon}"></i> ${repeatText}</div>
+        </div>
+      </div>
+      <div class="task-actions">
+        <button class="icon-btn delete-btn" onclick="deleteEvent(${index})">
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
+    `;
+    
+    eventList.appendChild(eventItem);
+  });
+  
+  document.querySelectorAll('.task-checkbox').forEach(checkbox => {
+    checkbox.addEventListener('click', function() {
+      const index = parseInt(this.getAttribute('data-event-index'));
+      events[index].completed = !events[index].completed;
+      saveData();
+      renderEvents();
+    });
+  });
+}
+
+function addEvent() {
+  const textInput = document.getElementById('eventInput');
+  const dateInput = document.getElementById('eventDate');
+  const timeInput = document.getElementById('eventTime');
+  const repeatInput = document.getElementById('eventRepeat');
+  
+  const text = textInput.value.trim();
+  const date = dateInput.value;
+  const time = timeInput.value;
+  const repeat = repeatInput.value;
+  
+  if (!text || !date) {
+    alert('Compila tutti i campi per aggiungere un evento');
+    return;
+  }
+  
+  const newEvent = {
+    id: Date.now(),
+    text,
+    date,
+    time: time || '00:00',
+    repeat,
+    completed: false
+  };
+  
+  events.push(newEvent);
+  
+  textInput.value = '';
+  dateInput.value = selectedDate;
+  timeInput.value = '';
+  repeatInput.value = 'none';
+  
+  saveData();
+  renderEvents();
+  renderCalendar();
+}
+
+function deleteEvent(index) {
+  if (confirm('Eliminare questo evento?')) {
+    events.splice(index, 1);
+    saveData();
+    renderEvents();
+    renderCalendar();
+  }
+}
+
+function navigateMonth(direction) {
+  currentDate.setMonth(currentDate.getMonth() + direction);
+  renderCalendar();
+  renderPlannedTasks();
+}
+
+function goToToday() {
+  currentDate = new Date();
+  selectedDate = currentDate.toISOString().split('T')[0];
+  calendarFilter = null;
+  document.getElementById('eventDate').value = selectedDate;
+  document.getElementById('eventTime').value = '';
+  renderCalendar();
+  renderEvents();
+  renderPlannedTasks();
+}
+
+// Gestione tabs
+function switchTab(tabId, type) {
+  if (type === 'todo') {
+    currentTodoTab = tabId;
+    document.querySelectorAll('.todo-panel .tab').forEach(tab => {
+      tab.classList.remove('active');
+    });
+    document.querySelector(`.todo-panel .tab[data-tab="${tabId}"]`).classList.add('active');
+    renderTodos();
+  } else if (type === 'calendar') {
+    currentCalendarTab = tabId;
+    document.querySelectorAll('.calendar-panel .tab').forEach(tab => {
+      tab.classList.remove('active');
+    });
+    document.querySelectorAll('.calendar-panel .tab-content').forEach(content => {
+      content.classList.remove('active');
+    });
+    document.querySelector(`.calendar-panel .tab[data-tab="${tabId}"]`).classList.add('active');
+    document.getElementById(`${tabId}-content`).classList.add('active');
+  }
+}
+
+// Inizializzazione
+document.addEventListener('DOMContentLoaded', function() {
+  // Carica tema
+  const savedTheme = localStorage.getItem('organizer_theme') || 'dark';
+  if (savedTheme === 'light') {
+    document.body.classList.add('light-theme');
+    document.getElementById('themeToggle').innerHTML = '<i class="fas fa-sun"></i>';
+  }
+  
+  // Setup event listeners
+  document.getElementById('addTodoBtn').addEventListener('click', addTodo);
+  document.getElementById('todoInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') addTodo();
+  });
+  
+  document.getElementById('addEventBtn').addEventListener('click', addEvent);
+  document.getElementById('eventInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') addEvent();
+  });
+  
+  document.getElementById('addTransactionBtn').addEventListener('click', openTransactionModal);
+  document.getElementById('addGoalBtn').addEventListener('click', openGoalModal);
+  document.getElementById('addNoteBtn').addEventListener('click', addNote);
+  
+  document.getElementById('noteInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      addNote();
+    }
+  });
+  
+  document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+  
+  document.getElementById('prevMonthBtn').addEventListener('click', () => navigateMonth(-1));
+  document.getElementById('nextMonthBtn').addEventListener('click', () => navigateMonth(1));
+  document.getElementById('todayBtn').addEventListener('click', goToToday);
+  
+  // Tabs To-Do
+  document.querySelectorAll('.todo-panel .tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+      const tabId = this.getAttribute('data-tab');
+      switchTab(tabId, 'todo');
+    });
+  });
+  
+  // Tabs Calendar
+  document.querySelectorAll('.calendar-panel .tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+      const tabId = this.getAttribute('data-tab');
+      switchTab(tabId, 'calendar');
+    });
+  });
+  
+  // Filtri transazioni
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const filter = this.getAttribute('data-filter');
+      renderTransactions(filter);
+    });
+  });
+  
+  // Gestione periodo personalizzato obiettivi
+  document.getElementById('goalPeriod').addEventListener('change', function() {
+    const customDateRange = document.getElementById('customDateRange');
+    customDateRange.style.display = this.value === 'custom' ? 'block' : 'none';
+  });
+  
+  // Cartelle
+  document.getElementById('addFolderBtn').addEventListener('click', openFolderModal);
+  
+  // Close modals on click outside
+  document.getElementById('transactionModal').addEventListener('click', function(e) {
+    if (e.target === this) closeTransactionModal();
+  });
+  
+  document.getElementById('goalModal').addEventListener('click', function(e) {
+    if (e.target === this) closeGoalModal();
+  });
+  
+  document.getElementById('planModal').addEventListener('click', function(e) {
+    if (e.target === this) closePlanModal();
+  });
+  
+  document.getElementById('folderModal').addEventListener('click', function(e) {
+    if (e.target === this) closeFolderModal();
+  });
+  
+  // Imposta data di oggi nei campi
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('eventDate').value = today;
+  document.getElementById('transactionDate').value = today;
+  
+  // Render iniziale
+  try {
+    renderTodos();
+    renderCalendar();
+    renderEvents();
+    renderTransactions();
+    renderGoals();
+    renderFolders();
+    renderNotes();
+    renderPlannedTasks();
+    updateStats();
+    updateFinanceStats();
+    updateGoalsStats();
+  } catch(e) {
+    console.error("Initial rendering error:", e);
+  }
+});
+
+// Inizializza i grafici dopo che tutto è caricato
+window.addEventListener('load', function() {
+  setTimeout(function() {
+    renderFinanceChart();
+    renderGoalsChart();
+  }, 100);
+});
+</script>
+</body>
+</html>
